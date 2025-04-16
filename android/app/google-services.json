@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "422543403300",
+    "project_id": "laptopharbor-ddde2",
+    "storage_bucket": "laptopharbor-ddde2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:422543403300:android:84e41fec9d6bc6783fabb1",
+        "android_client_info": {
+          "package_name": "com.example.laptop_harbor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmau7QSvGwbBSasZxcmiSQzF05ltj_yrA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
