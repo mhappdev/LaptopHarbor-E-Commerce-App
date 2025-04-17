@@ -107,12 +107,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                         buttonColor: AppColors.blue,
                         textColor: Colors.white,
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Auth(),
-                            ),
-                          );
+                          Navigator.pushNamed(context, '/auth');
                         },
                       )
                     : CustomButton(

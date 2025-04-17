@@ -1,15 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class AdminHome extends StatefulWidget {
+  const AdminHome({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<AdminHome> createState() => _AdminHomeState();
 }
 
-class _HomeState extends State<Home> {
-  // Make sure if a user is not logged in and somehow lands on /home, you redirect them back:
+class _AdminHomeState extends State<AdminHome> {
+  // Make sure if a user is not logged in and somehow lands on /AdminHome, you redirect them back:
   @override
   void initState() {
     super.initState();
@@ -31,13 +31,12 @@ class _HomeState extends State<Home> {
       await FirebaseAuth.instance.signOut();
 
       // Go back to Auth or Splash screen
-      Navigator.pushNamedAndRemoveUntil(
-          context, '/splash-screen', (route) => false);
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: const Text('AdminHome'),
         actions: [
           IconButton(
               onPressed: () {

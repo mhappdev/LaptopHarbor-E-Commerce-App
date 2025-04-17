@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
@@ -17,49 +18,76 @@ class _SignupState extends State<Signup> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  // Create Firebase Collection
+  final users = FirebaseFirestore.instance.collection('users');
+
+// 💨 SignUp / Register Authentication Function
   bool loader = false;
-// SignUp / Register Authentication Function
-  regUser() async {
+  Future<void> regUser() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      loader = true;
+    });
+
     try {
-      if (_formKey.currentState!.validate()) {
-        setState(() {
-          loader = true;
-        });
-        final credential =
-            await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
+      // 1. Create user in Firebase Auth
+      final credential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
 
-        // Show success message
-        ToastMsg.showToastMsg('Registration Successful');
+      // 2. Save user details to Firestore with UID as doc ID
+      final uid = credential.user!.uid;
 
-        // Wait a bit so the user can see the toast
-        await Future.delayed(Duration(seconds: 2));
+// ADD USER DATA TO THE FIRESTORE DATABASE COLLECTION
+      await users.doc(uid).set({
+        "name": _nameController.text,
+        "email": _emailController.text.trim(),
+        "phone": _phoneController.text,
+        "password": _passwordController.text,
+        "role": "user",
+      });
 
-        loader = false; // Stop loader before navigating
-        setState(() {});
+      ToastMsg.showToastMsg('Registration Successful');
 
-        // Navigate to home
-        Navigator.pushNamed(context, '/home');
-      }
+      setState(() {
+        loader = false;
+      });
+
+      // Short delay just to show toast
+      await Future.delayed(Duration(seconds: 1));
+
+      Navigator.pushNamed(context, '/home');
     } on FirebaseAuthException catch (e) {
-      loader = false; // Stop loader in all error cases
-      setState(() {});
       if (e.code == 'weak-password') {
         ToastMsg.showToastMsg('The password provided is too weak');
       } else if (e.code == 'email-already-in-use') {
         ToastMsg.showToastMsg(
-            'The account already exists for that email. Please Login');
+            'Account already exists. Redirecting to login...');
 
-        // 💨 move to LOGIN page After 2 Seconds
-        await Future.delayed(Duration(seconds: 4));
+        // ✅ STOP loader immediately before delay
+        setState(() {
+          loader = false;
+        });
+
+        await Future.delayed(Duration(seconds: 3));
         Navigator.pushNamed(context, '/login');
+        return; // stop further execution
+      } else {
+        ToastMsg.showToastMsg('Registration failed: ${e.message}');
       }
     } catch (e) {
-      loader = false;
-      setState(() {});
-      print(e);
+      print('Error: $e');
+      ToastMsg.showToastMsg('Something went wrong. Please try again.');
+    } finally {
+      // ✅ Only stop loader if it hasn't already been stopped
+      if (loader) {
+        setState(() {
+          loader = false;
+        });
+      }
     }
   }
 

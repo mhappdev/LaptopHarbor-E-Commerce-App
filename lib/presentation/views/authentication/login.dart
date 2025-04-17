@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
@@ -17,43 +18,60 @@ class _LoginState extends State<Login> {
 
   bool loader = false;
 
-  // Login Authentication Function
   loginUser() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      loader = true;
+    });
+
     try {
-      if (_formKey.currentState!.validate()) {
-        setState(() {
-          loader = true;
-        });
-        UserCredential userCredential =
-            await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
+      final userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
 
-        // Show success message
-        ToastMsg.showToastMsg('lOGIN Successful');
+// 1. Get the currently logged-in user
+      final user = FirebaseAuth.instance.currentUser;
 
-        // Wait a bit so the user can see the toast
-        await Future.delayed(Duration(seconds: 2));
+      if (user != null) {
+        // 2. Fetch their document from Firestore using UID
+        final userDoc = await FirebaseFirestore.instance
+            .collection("users")
+            .doc(user.uid)
+            .get();
 
-        loader = false; // Stop loader before navigating
-        setState(() {});
+        final role = userDoc.data()?['role']; // explanation in the noteBook
 
-        // Navigate to home
-        Navigator.pushNamed(context, '/home');
+        // 3. Navigate based on role
+        if (role == "admin") {
+          ToastMsg.showToastMsg('Login successful as admin');
+          Navigator.pushReplacementNamed(context, '/admin-home');
+        } else {
+          ToastMsg.showToastMsg('Login successful');
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       }
     } on FirebaseAuthException catch (e) {
-      loader = false; // Stop loader in all error cases
-      setState(() {});
       if (e.code == 'user-not-found') {
+        // NOT WORKING
         ToastMsg.showToastMsg('No user found for that email.');
       } else if (e.code == 'wrong-password') {
-        ToastMsg.showToastMsg('Wrong password provided for that user.');
+        // NOT WORKING
+        ToastMsg.showToastMsg('Wrong password provided.');
+      } else if (e.code == 'invalid-email') {
+        // NOT WORKING
+        ToastMsg.showToastMsg('Invalid email address.');
+      } else {
+        ToastMsg.showToastMsg('Login failed: ${e.message}'); // working
       }
     } catch (e) {
-      loader = false;
-      setState(() {});
-      print(e);
+      ToastMsg.showToastMsg('Unexpected error: $e');
+    } finally {
+      setState(() {
+        loader = false;
+      });
     }
   }
 

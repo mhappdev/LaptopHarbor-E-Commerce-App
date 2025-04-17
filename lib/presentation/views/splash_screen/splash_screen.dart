@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
 import 'package:laptop_harbor/core/images_path.dart';
-import 'package:laptop_harbor/presentation/views/on_boarding/on_boarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,18 +14,28 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  // Instance of splash services
+
   @override
   void initState() {
     super.initState();
-    Timer(
-      (Duration(seconds: 4)),
-      () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => OnBoardingScreen()),
-        );
-      },
-    );
+    _checkLoginStatus();
+  }
+
+  // CHECK LOGIN STATUS
+  // This function checks if the user is logged in or not and navigates accordingly
+  void _checkLoginStatus() async {
+    await Future.delayed(Duration(seconds: 2)); // simulate splash time
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      // ✅ User already logged in
+      Navigator.pushReplacementNamed(context, '/home');
+    } else {
+      // 👣 Continue to onboarding or auth
+      Navigator.pushReplacementNamed(context, '/onboarding');
+    }
   }
 
   @override

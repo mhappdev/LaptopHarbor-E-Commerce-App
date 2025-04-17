@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:laptop_harbor/utils/toast_msg.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
@@ -20,17 +22,43 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     super.dispose();
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isSubmitted = true;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password reset link sent to your email')),
-      );
-      // Here you would typically send a password reset email
+      final email = _emailController.text.trim();
+
+      try {
+        await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+        setState(() {
+          _isSubmitted = true;
+        });
+        ToastMsg.showToastMsg(
+            'If this email is registered, a reset link has been sent.');
+      } catch (error) {
+        // Handle unexpected errors gracefully (e.g., network issues)
+        ToastMsg.showToastMsg('Something went wrong. Please try again later.');
+      }
     }
   }
+
+  // void _submitForm() {
+  //   if (_formKey.currentState!.validate()) {
+  //     setState(() {
+  //       _isSubmitted = true;
+  //     });
+
+  //     FirebaseAuth.instance
+  //         .sendPasswordResetEmail(
+  //       email: _emailController.text.trim(),
+  //     )
+  //         .then((_) {
+  //       // Optionally, navigate to another screen or show a success message
+  //       ToastMsg.showToastMsg('Check your email for the reset link');
+  //     }).catchError((error) {
+  //       // Handle error (e.g., show an error message)
+  //       ToastMsg.showToastMsg('Error: ${error.toString()}');
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
