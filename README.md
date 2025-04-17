@@ -46,7 +46,7 @@ LaptopHarbor is a modern, scalable, and user-friendly mobile e-commerce applicat
 
 - **Frontend:** Flutter (Dart)
 - **Backend:** Firebase Auth, Firestore (soon)
-- **State Management:** [Choose yours, if using e.g. Provider / Bloc / Riverpod]
+- **State Management:** Provider 
 - **Other:** Firebase Core, Navigation 2.0, Clean UI
 
 ---
