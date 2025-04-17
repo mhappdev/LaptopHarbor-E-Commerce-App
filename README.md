@@ -54,7 +54,7 @@ LaptopHarbor is a modern, scalable, and user-friendly mobile e-commerce applicat
 ## 🧑‍💻 Author
 
 **Muhammad Hassan**  
-[LinkedIn]https://www.linkedin.com/in/mh-muhammadhassan/
+[LinkedIn]  https://www.linkedin.com/in/mh-muhammadhassan/
 
 ---
 
