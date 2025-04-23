@@ -1,5 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:laptop_harbor/core/app_colors.dart';
+import 'package:laptop_harbor/core/images_path.dart';
+import 'package:laptop_harbor/presentation/views/drawer/custom_drawer.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -26,25 +30,46 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    // SIGNOUT FUNCTION
-    Future<void> signOutUser(BuildContext context) async {
-      await FirebaseAuth.instance.signOut();
+    final width = MediaQuery.sizeOf(context).width * 1;
+    final height = MediaQuery.sizeOf(context).height * 1;
 
-      // Go back to Auth or Splash screen
-      Navigator.pushNamedAndRemoveUntil(
-          context, '/splash-screen', (route) => false);
-    }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        iconTheme: IconThemeData(
+          color: Colors.white, // White menu icon
+          size: 30,
+        ),
+        backgroundColor: AppColors.blue,
+        title: Text(
+          "LaptopHarbor",
+          style: TextStyle(color: Colors.white),
+        ),
         actions: [
           IconButton(
-              onPressed: () {
-                signOutUser(context);
-              },
-              icon: Icon(Icons.logout_rounded)),
+            icon: Icon(
+              Icons.search,
+            ),
+            onPressed: () {
+              // Search action
+            },
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.shopping_cart,
+            ),
+            onPressed: () {
+              // Add to cart action
+            },
+          ),
         ],
+      ),
+      drawer: CustomDrawer(),
+      body: Center(
+        child: Text(
+          'COMING SOON!',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }

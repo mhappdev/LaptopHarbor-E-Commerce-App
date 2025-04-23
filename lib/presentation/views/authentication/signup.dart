@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
+import 'package:laptop_harbor/data/local/user_local_data.dart';
 import 'package:laptop_harbor/utils/toast_msg.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -17,6 +19,7 @@ class _SignupState extends State<Signup> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  String fullPhoneNumber = '';
 
   // Create Firebase Collection
   final users = FirebaseFirestore.instance.collection('users');
@@ -45,8 +48,8 @@ class _SignupState extends State<Signup> {
       await users.doc(uid).set({
         "name": _nameController.text,
         "email": _emailController.text.trim(),
-        "phone": _phoneController.text,
-        "password": _passwordController.text,
+        "phone": fullPhoneNumber,
+        "password": _passwordController.text.trim(),
         "role": "user",
       });
 
@@ -56,10 +59,18 @@ class _SignupState extends State<Signup> {
         loader = false;
       });
 
+      // SAVE USER INFORMATION in SHARED PREFERENCES FOR DRAWER
+      UserLocalData.saveUserData(
+          name: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          phone: fullPhoneNumber);
+
       // Short delay just to show toast
       await Future.delayed(Duration(seconds: 1));
 
-      Navigator.pushNamed(context, '/home');
+      Navigator.pushNamed(context, '/select-profile-picture-screen');
+
+      // Navigator.pushNamed(context, '/home');
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         ToastMsg.showToastMsg('The password provided is too weak');
@@ -205,27 +216,28 @@ class _SignupState extends State<Signup> {
                         },
                       ),
                       const SizedBox(height: 20),
-                      // Phone Field
-                      TextFormField(
+
+                      IntlPhoneField(
                         controller: _phoneController,
-                        keyboardType: TextInputType.phone,
                         decoration: InputDecoration(
                           labelText: 'Phone Number',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          prefixIcon: const Icon(Icons.phone),
+                          prefixIcon: Icon(Icons.phone),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
+                        initialCountryCode: 'PK', // Default to Pakistan
+                        onChanged: (phone) {
+                          fullPhoneNumber = phone.completeNumber;
+                        },
+                        validator: (phone) {
+                          if (phone == null || phone.number.isEmpty) {
                             return 'Please enter your phone number';
-                          }
-                          if (value.length < 11) {
-                            return 'Phone number must be at least 11 digits';
                           }
                           return null;
                         },
                       ),
+
                       const SizedBox(height: 20),
                       // Password Field
                       TextFormField(

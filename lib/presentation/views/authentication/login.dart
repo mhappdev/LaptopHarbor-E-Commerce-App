@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
+import 'package:laptop_harbor/data/local/user_local_data.dart';
 import 'package:laptop_harbor/utils/toast_msg.dart';
 
 class Login extends StatefulWidget {
@@ -32,19 +33,22 @@ class _LoginState extends State<Login> {
         password: _passwordController.text,
       );
 
-// 1. Get the currently logged-in user
       final user = FirebaseAuth.instance.currentUser;
 
       if (user != null) {
-        // 2. Fetch their document from Firestore using UID
         final userDoc = await FirebaseFirestore.instance
             .collection("users")
             .doc(user.uid)
             .get();
 
-        final role = userDoc.data()?['role']; // explanation in the noteBook
+        final role = userDoc.data()?['role'];
+        final name = userDoc.data()?['name'] ?? '';
+        final email = user.email ?? '';
 
-        // 3. Navigate based on role
+        // ✅ Save to SharedPreferences
+        UserLocalData.saveUserData(name: name, email: email);
+
+        // Navigate
         if (role == "admin") {
           ToastMsg.showToastMsg('Login successful as admin');
           Navigator.pushReplacementNamed(context, '/admin-home');
@@ -55,16 +59,13 @@ class _LoginState extends State<Login> {
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
-        // NOT WORKING
         ToastMsg.showToastMsg('No user found for that email.');
       } else if (e.code == 'wrong-password') {
-        // NOT WORKING
         ToastMsg.showToastMsg('Wrong password provided.');
       } else if (e.code == 'invalid-email') {
-        // NOT WORKING
         ToastMsg.showToastMsg('Invalid email address.');
       } else {
-        ToastMsg.showToastMsg('Login failed: ${e.message}'); // working
+        ToastMsg.showToastMsg('Login failed: ${e.message}');
       }
     } catch (e) {
       ToastMsg.showToastMsg('Unexpected error: $e');

@@ -40,7 +40,12 @@ dependencies:
   firebase_core: ^3.13.0
   cloud_firestore: ^5.6.6
   firebase_auth: ^5.4.1
+  firebase_storage: ^12.4.5
   fluttertoast: ^8.2.12
+  shared_preferences: ^2.5.3
+  image_picker: ^1.1.2
+  intl_phone_field: ^3.2.0
+  shimmer: ^3.0.0
   
 
 dev_dependencies:
