@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
 import 'package:laptop_harbor/data/local/user_local_data.dart';
+import 'package:laptop_harbor/presentation/views/admin/screens/product_list_screen.dart';
 import 'package:laptop_harbor/utils/toast_msg.dart';
 
 class Login extends StatefulWidget {
@@ -50,6 +51,8 @@ class _LoginState extends State<Login> {
 
         // Navigate
         if (role == "admin") {
+          // Navigator.push(context,
+          //     MaterialPageRoute(builder: (context) => ProductListScreen()));
           ToastMsg.showToastMsg('Login successful as admin');
           Navigator.pushReplacementNamed(context, '/admin-home');
         } else {

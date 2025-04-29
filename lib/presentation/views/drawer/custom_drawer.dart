@@ -18,13 +18,25 @@ class _CustomDrawerState extends State<CustomDrawer> {
   String userName = 'No Name';
   String userEmail = 'No Email';
   String? userPhone;
+  String? profileImageUrl; // PROFILE
 
   @override
   void initState() {
     super.initState();
     loadUserDetails();
+    loadProfileImage();
   }
 
+// LOAD PROFILE PICTURE
+  Future<void> loadProfileImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final url = prefs.getString('profileImageUrl');
+    setState(() {
+      profileImageUrl = url;
+    });
+  }
+
+// LOAD USER DETAILS
   Future<void> loadUserDetails() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -86,7 +98,12 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           ? MemoryImage(webImageBytes!)
                           : imageFile != null
                               ? FileImage(imageFile!)
-                              : AssetImage('assets/user.jpg') as ImageProvider,
+                              : (profileImageUrl != null &&
+                                          profileImageUrl!.isNotEmpty
+                                      ? NetworkImage(profileImageUrl!)
+                                      : AssetImage(
+                                          'assets/images/default_avatar.png'))
+                                  as ImageProvider,
                     ),
                     SizedBox(width: screenWidth * 0.03),
                     Column(
@@ -120,7 +137,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 buildDrawerItem(context, Icons.shopping_bag, "My Orders", () {
                   Navigator.pushNamed(context, '/orders');
                 }),
-                buildDrawerItem(context, Icons.location_on, "Change Password",
+                buildDrawerItem(context, Icons.lock_reset, "Change Password",
                     () {
                   Navigator.pushNamed(context, '/change-password');
                 }),

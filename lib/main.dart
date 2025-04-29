@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/firebase_options.dart';
-import 'package:laptop_harbor/presentation/views/admin/admin_home.dart';
+import 'package:laptop_harbor/presentation/views/admin/screens/product_list_screen.dart';
 import 'package:laptop_harbor/presentation/views/authentication/auth.dart';
 import 'package:laptop_harbor/presentation/views/authentication/forgot_password.dart';
 import 'package:laptop_harbor/presentation/views/authentication/login.dart';
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
 
       routes: {
         // ADMIN - 1
-        '/admin-home': (context) => const AdminHome(),
+        '/admin-home': (context) => const ProductListScreen(),
         // AUTHENTICATION - 2
         '/auth': (context) => const Auth(),
         '/forgot-password': (context) => const ForgotPassword(),
