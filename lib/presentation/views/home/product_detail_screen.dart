@@ -1,3 +1,5 @@
+
+
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:laptop_harbor/presentation/views/admin/models/product_model.dart';
@@ -17,9 +19,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Your color theme
+    final Color primaryColor = Color(0xFF040F39); // Primary color
+    final Color accentColor = Color(0xFFFD8D10); // Accent color
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.product.laptopName),
+        backgroundColor: primaryColor,
+        title: Text(
+          widget.product.laptopName,
+          style: TextStyle(color: Colors.white),
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -39,7 +49,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 children: [
                   Text(
                     widget.product.brandName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey,
                     ),
@@ -47,9 +57,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const SizedBox(height: 8),
                   Text(
                     widget.product.laptopName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: primaryColor,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -67,10 +78,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       const Spacer(),
                       Text(
                         '\$${widget.product.price.toStringAsFixed(2)}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.green,
+                          color: accentColor,
                         ),
                       ),
                     ],
@@ -81,11 +92,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     style: const TextStyle(fontSize: 16),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     'Description',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: primaryColor,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -94,11 +106,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     style: const TextStyle(fontSize: 16),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     'Specifications',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: primaryColor,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -147,6 +160,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   // Add to cart
                 },
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: accentColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -159,6 +173,25 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
             ),
           ],
+        ),
+      ),
+      bottomSheet: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ElevatedButton(
+          onPressed: () {
+            // Proceed to order
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: primaryColor,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: const Text(
+            'Proceed to Order',
+            style: TextStyle(fontSize: 18),
+          ),
         ),
       ),
     );

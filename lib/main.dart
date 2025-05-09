@@ -1,5 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:laptop_harbor/presentation/providers/cart_provider.dart';
+import 'package:laptop_harbor/presentation/providers/wishlist_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:laptop_harbor/firebase_options.dart';
 import 'package:laptop_harbor/presentation/views/admin/screens/products_screen.dart';
 import 'package:laptop_harbor/presentation/views/authentication/auth.dart';
@@ -19,7 +22,17 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => WishlistProvider()),
+        // Add other providers here as needed
+        // ChangeNotifierProvider(create: (context) => AnotherProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -45,11 +58,9 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const Signup(),
         // DRAWER - 3
         '/my-profile': (context) => ProfileSection(),
-        '/change-password': (context) => ChangePassword(),  
-        '/contact-form': (context) => ContactForm(), 
-        '/faqs': (context) => Faqs(), 
-
-
+        '/change-password': (context) => ChangePassword(),
+        '/contact-form': (context) => ContactForm(),
+        '/faqs': (context) => Faqs(),
 
         // HOME - 4
         '/home': (context) => const NavigationWrapper(),

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/services.dart';
+import 'package:laptop_harbor/presentation/providers/cart_provider.dart';
+import 'package:laptop_harbor/presentation/providers/wishlist_provider.dart';
+import 'package:laptop_harbor/presentation/views/home/cart_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:laptop_harbor/presentation/views/admin/models/product_model.dart';
 import 'package:laptop_harbor/presentation/views/admin/firebase/firestore_service.dart';
 import 'package:laptop_harbor/presentation/views/admin/screens/product_detail_screen.dart';
@@ -82,7 +86,6 @@ class _HomeState extends State<Home> {
   void _applyFilters() {
     List<Product> filtered = List.from(_allProducts);
 
-    // Search filter
     if (_searchController.text.isNotEmpty) {
       filtered = filtered.where((product) {
         return product.laptopName
@@ -94,21 +97,18 @@ class _HomeState extends State<Home> {
       }).toList();
     }
 
-    // Category filter
     if (_selectedCategory != 'All') {
       filtered = filtered
           .where((product) => product.category == _selectedCategory)
           .toList();
     }
 
-    // Brand filter
     if (_selectedBrand != 'All') {
       filtered = filtered
           .where((product) => product.brandName == _selectedBrand)
           .toList();
     }
 
-    // Price range filter
     if (_selectedPriceRange != 'All') {
       switch (_selectedPriceRange) {
         case 'Under \$500':
@@ -129,7 +129,6 @@ class _HomeState extends State<Home> {
       }
     }
 
-    // Sorting
     filtered = _sortProducts(filtered);
 
     if (mounted) setState(() => _filteredProducts = filtered);
@@ -159,59 +158,113 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Laptop Harbor'),
+        title:
+            const Text('Laptop Harbor', style: TextStyle(color: Colors.white)),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: const Color(0xff037EEE),
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () => showSearch(
-              context: context,
-              delegate: ProductSearchDelegate(_allProducts),
-            ),
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: ProductSearchDelegate(_allProducts),
+              );
+            },
           ),
-          IconButton(
-            icon: const Icon(Icons.shopping_cart),
-            onPressed: () {/* Navigate to cart */},
+          Consumer<CartProvider>(
+            builder: (context, cart, child) {
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.shopping_cart),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const CartScreen()),
+                      );
+                    },
+                  ),
+                  if (cart.itemCount > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          cart.itemCount.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ],
       ),
       drawer: CustomDrawer(),
-      body: StreamBuilder<List<Product>>(
-        stream: _productsStream,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) return _buildErrorState();
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return _buildLoadingState();
-          }
+      body: Container(
+        color: Colors.grey[50],
+        child: StreamBuilder<List<Product>>(
+          stream: _productsStream,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) return _buildErrorState();
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return _buildLoadingState();
+            }
 
-          _allProducts = snapshot.data!;
-          WidgetsBinding.instance.addPostFrameCallback((_) => _applyFilters());
+            _allProducts = snapshot.data!;
+            WidgetsBinding.instance
+                .addPostFrameCallback((_) => _applyFilters());
 
-          return CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(child: _buildBannerSlider()),
-              SliverPadding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                sliver:
-                    SliverToBoxAdapter(child: _buildFilterRow(isLargeScreen)),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                sliver: _buildProductGrid(),
-              ),
-            ],
-          );
-        },
+            return CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: _buildBannerSlider(),
+                  ),
+                ),
+                SliverPadding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  sliver:
+                      SliverToBoxAdapter(child: _buildFilterRow(isLargeScreen)),
+                ),
+                SliverPadding(
+                  padding:
+                      const EdgeInsets.only(bottom: 80), // Added bottom padding
+                  sliver: _buildProductGrid(),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildLoadingState() =>
-      const Center(child: CircularProgressIndicator());
+  Widget _buildLoadingState() => Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(const Color(0xff037EEE)),
+        ),
+      );
 
   Widget _buildErrorState() => Center(
         child: Column(
@@ -219,44 +272,60 @@ class _HomeState extends State<Home> {
           children: [
             const Icon(Icons.error_outline, size: 48, color: Colors.red),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               'Failed to load products',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () => setState(() {}),
-              child: const Text('Retry'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xff037EEE),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Retry', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
       );
 
   Widget _buildBannerSlider() {
-    return CarouselSlider(
-      options: CarouselOptions(
-        height: 180,
-        autoPlay: true,
-        enlargeCenterPage: true,
-        viewportFraction: 0.9,
-        autoPlayInterval: const Duration(seconds: 5),
-      ),
-      items: [
-        'assets/images/banner1.jpg',
-        'assets/images/banner2.jpg',
-        'assets/images/banner3.jpg',
-      ].map((asset) {
-        return Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            image: DecorationImage(
-              image: AssetImage(asset),
-              fit: BoxFit.cover,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: CarouselSlider(
+        options: CarouselOptions(
+          height: 160,
+          autoPlay: true,
+          enlargeCenterPage: true,
+          viewportFraction: 0.95,
+          autoPlayInterval: const Duration(seconds: 5),
+        ),
+        items: [
+          'assets/images/banner1.jpg',
+          'assets/images/banner2.jpg',
+          'assets/images/banner3.jpg',
+        ].map((asset) {
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              image: DecorationImage(
+                image: AssetImage(asset),
+                fit: BoxFit.cover,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
-          ),
-        );
-      }).toList(),
+          );
+        }).toList(),
+      ),
     );
   }
 
@@ -268,9 +337,9 @@ class _HomeState extends State<Home> {
         Row(
           children: [
             Expanded(child: _buildBrandDropdown()),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(child: _buildPriceRangeDropdown()),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(child: _buildSortDropdown()),
           ],
         ),
@@ -286,7 +355,7 @@ class _HomeState extends State<Home> {
         itemCount: _categories.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
-          return FilterChip(
+          return ChoiceChip(
             label: Text(_categories[index]),
             selected: _selectedCategory == _categories[index],
             onSelected: (selected) {
@@ -295,11 +364,11 @@ class _HomeState extends State<Home> {
                 _applyFilters();
               });
             },
-            selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
+            selectedColor: const Color(0xff037EEE),
             backgroundColor: Colors.grey[200],
             labelStyle: TextStyle(
               color: _selectedCategory == _categories[index]
-                  ? Theme.of(context).primaryColor
+                  ? Colors.white
                   : Colors.black,
             ),
             shape: RoundedRectangleBorder(
@@ -317,7 +386,7 @@ class _HomeState extends State<Home> {
       items: _brands
           .map((brand) => DropdownMenuItem(
                 value: brand,
-                child: Text(brand),
+                child: Text(brand, style: const TextStyle(color: Colors.black)),
               ))
           .toList(),
       onChanged: (value) {
@@ -328,12 +397,23 @@ class _HomeState extends State<Home> {
       },
       decoration: InputDecoration(
         labelText: 'Brand',
+        labelStyle: const TextStyle(color: Colors.black),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       ),
       isExpanded: true,
+      dropdownColor: Colors.white,
+      style: const TextStyle(fontSize: 14),
     );
   }
 
@@ -343,7 +423,7 @@ class _HomeState extends State<Home> {
       items: _priceRanges
           .map((range) => DropdownMenuItem(
                 value: range,
-                child: Text(range),
+                child: Text(range, style: const TextStyle(color: Colors.black)),
               ))
           .toList(),
       onChanged: (value) {
@@ -354,12 +434,23 @@ class _HomeState extends State<Home> {
       },
       decoration: InputDecoration(
         labelText: 'Price Range',
+        labelStyle: const TextStyle(color: Colors.black),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       ),
       isExpanded: true,
+      dropdownColor: Colors.white,
+      style: const TextStyle(fontSize: 14),
     );
   }
 
@@ -369,7 +460,8 @@ class _HomeState extends State<Home> {
       items: _sortOptions
           .map((option) => DropdownMenuItem(
                 value: option,
-                child: Text(option),
+                child:
+                    Text(option, style: const TextStyle(color: Colors.black)),
               ))
           .toList(),
       onChanged: (value) {
@@ -380,12 +472,23 @@ class _HomeState extends State<Home> {
       },
       decoration: InputDecoration(
         labelText: 'Sort By',
+        labelStyle: const TextStyle(color: Colors.black),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       ),
       isExpanded: true,
+      dropdownColor: Colors.white,
+      style: const TextStyle(fontSize: 14),
     );
   }
 
@@ -414,7 +517,7 @@ class _HomeState extends State<Home> {
     }
 
     return SliverGrid(
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 0.75,
         crossAxisSpacing: 16,
@@ -428,119 +531,167 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildProductCard(Product product) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      elevation: 3,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image + Wishlist in Stack
-            Stack(
-              children: [
-                // Centered Image with fixed height to avoid overflow
-                Center(
-                  child: SizedBox(
-                    height: 100,
-                    child: Image.network(
-                      product.imageUrls.first,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) =>
-                          const Icon(Icons.image_not_supported),
+  return Consumer2<CartProvider, WishlistProvider>(
+    builder: (context, cart, wishlist, child) {
+      final isWishlisted = wishlist.isInWishlist(product);
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8), // Left-right padding
+        child: GestureDetector(
+          onTap: () {
+            // Navigate to Product Detail Screen
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProductDetailScreen(product: product),
+              ),
+            );
+          },
+          child: Card(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            elevation: 4,
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Product Image with Wishlist Icon
+                  Stack(
+                    children: [
+                      Center(
+                        child: SizedBox(
+                          height: 100,
+                          child: Image.network(
+                            product.imageUrls.first,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) =>
+                                const Icon(Icons.image_not_supported),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: IconButton(
+                          icon: Icon(
+                            isWishlisted ? Icons.favorite : Icons.favorite_border,
+                            color: isWishlisted ? Colors.red : Colors.grey,
+                          ),
+                          onPressed: () {
+                            wishlist.toggleWishlist(product);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  isWishlisted
+                                      ? 'Removed from Wishlist'
+                                      : 'Added to Wishlist',
+                                ),
+                                duration: const Duration(seconds: 1),
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Laptop Name
+                  Text(
+                    product.laptopName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                // Wishlist icon on top right
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: IconButton(
-                    icon: const Icon(Icons.favorite_border, color: Colors.red),
-                    onPressed: () {},
+                  const SizedBox(height: 6),
+
+                  // Ratings
+                  Row(
+                    children: [
+                      ...List.generate(5, (index) {
+                        return Icon(
+                          index < product.rating.round()
+                              ? Icons.star
+                              : Icons.star_border,
+                          size: 14,
+                          color: Colors.amber,
+                        );
+                      }),
+                      const SizedBox(width: 4),
+                      Text(
+                        product.rating.toStringAsFixed(1),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
+                  const SizedBox(height: 10),
 
-            // Laptop Name
-            Text(
-              product.laptopName,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-
-            // Ratings
-            Row(
-              children: [
-                ...List.generate(5, (index) {
-                  return Icon(
-                    index < product.rating.round()
-                        ? Icons.star
-                        : Icons.star_border,
-                    size: 14,
-                    color: Colors.amber,
-                  );
-                }),
-                const SizedBox(width: 4),
-                Text(product.rating.toStringAsFixed(1),
-                    style: const TextStyle(fontSize: 12)),
-              ],
-            ),
-            const SizedBox(height: 6),
-
-            // Price and Add to Cart
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '\$${product.price.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-                ElevatedButton(
-                  onPressed: () {},
-                  child: const Icon(Icons.shopping_cart, size: 16),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(6),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  // Price and Cart Button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '\$${product.price.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          cart.addToCart(product);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content:
+                                  Text('${product.laptopName} added to cart'),
+                              duration: const Duration(seconds: 1),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xff037EEE), // Theme color
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.shopping_cart_checkout, // 3D-feel icon
+                            size: 18,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ],
+          ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
+
 
   void _navigateToProductDetail(Product product) {
     HapticFeedback.lightImpact();
     Navigator.push(
       context,
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 300),
-        pageBuilder: (_, __, ___) => ProductDetailScreen(product: product),
-        transitionsBuilder: (_, animation, __, child) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.1),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOut,
-            )),
-            child: FadeTransition(
-              opacity: animation,
-              child: child,
-            ),
-          );
-        },
+      MaterialPageRoute(
+        builder: (context) => ProductDetailScreen(product: product),
       ),
     );
   }
