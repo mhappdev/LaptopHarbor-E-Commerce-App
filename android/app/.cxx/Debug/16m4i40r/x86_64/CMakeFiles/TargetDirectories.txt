@@ -1,0 +1,2 @@
+D:/laptop_harbor/android/app/.cxx/Debug/16m4i40r/x86_64/CMakeFiles/edit_cache.dir
+D:/laptop_harbor/android/app/.cxx/Debug/16m4i40r/x86_64/CMakeFiles/rebuild_cache.dir

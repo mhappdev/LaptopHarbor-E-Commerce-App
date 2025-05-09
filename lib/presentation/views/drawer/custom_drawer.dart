@@ -134,26 +134,27 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 buildDrawerItem(context, Icons.person, "My Profile", () {
                   Navigator.pushNamed(context, '/my-profile');
                 }),
-                buildDrawerItem(context, Icons.shopping_bag, "My Orders", () {
-                  Navigator.pushNamed(context, '/orders');
-                }),
                 buildDrawerItem(context, Icons.lock_reset, "Change Password",
                     () {
                   Navigator.pushNamed(context, '/change-password');
                 }),
+                buildDrawerItem(context, Icons.shopping_bag, "My Orders", () {
+                  Navigator.pushNamed(context, '/orders');
+                }),
+
                 buildDrawerItem(context, Icons.credit_card, "Payment Methods",
                     () {
                   Navigator.pushNamed(context, '/payments');
                 }),
                 buildDrawerItem(context, Icons.mail_outline, "Contact Us", () {
-                  Navigator.pushNamed(context, '/contact');
+                  Navigator.pushNamed(context, '/contact-form');
                 }),
                 buildDrawerItem(context, Icons.help_outline, "Help & FAQs", () {
-                  Navigator.pushNamed(context, '/help');
+                  Navigator.pushNamed(context, '/faqs');
                 }),
-                buildDrawerItem(context, Icons.settings, "Settings", () {
-                  Navigator.pushNamed(context, '/settings');
-                }),
+                // buildDrawerItem(context, Icons.settings, "Settings", () {
+                //   Navigator.pushNamed(context, '/settings');
+                // }),
                 buildDrawerItem(context, Icons.logout, "Log Out", () {
                   signOutUser(context);
                 }),

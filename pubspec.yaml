@@ -53,6 +53,9 @@ dependencies:
   gradient_borders: ^1.0.0
   lottie: ^2.6.0
   carousel_slider: ^5.0.0
+  intl: ^0.18.1
+  cached_network_image: ^3.2.3
+
   # flutter_local_notifications: ^9.1.5
   
 

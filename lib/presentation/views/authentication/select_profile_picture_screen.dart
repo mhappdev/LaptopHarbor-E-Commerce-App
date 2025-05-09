@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:laptop_harbor/core/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SelectProfilePictureScreen extends StatefulWidget {
@@ -16,57 +18,129 @@ class SelectProfilePictureScreen extends StatefulWidget {
 class _SelectProfilePictureScreenState
     extends State<SelectProfilePictureScreen> {
   File? _imageFile;
-  String? _ImageUrl;
-  final Color primaryColor = const Color(0xff037EEE);
+  String? _imageUrl;
+  final Color primaryColor = AppColors.blue;
   bool _isUploading = false;
+  double _uploadProgress = 0;
 
   Future<void> _pickImage(ImageSource source) async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(source: source);
-    if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? pickedFile = await picker.pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 800,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error selecting image: ${e.toString()}')),
+        );
+      }
     }
   }
 
   Future<void> _uploadToImage() async {
     if (_imageFile == null) return;
+
     setState(() {
       _isUploading = true;
+      _uploadProgress = 0;
     });
 
-    final url = Uri.parse('https://api.cloudinary.com/v1_1/diu1cxyph/upload');
-    final request = http.MultipartRequest('POST', url)
-      ..fields['upload_preset'] = 'profiles'
-      ..files.add(await http.MultipartFile.fromPath('file', _imageFile!.path));
-    final response = await request.send();
+    try {
+      final url = Uri.parse('https://api.cloudinary.com/v1_1/diu1cxyph/upload');
+      final request = http.MultipartRequest('POST', url)
+        ..fields['upload_preset'] = 'profiles'
+        ..files
+            .add(await http.MultipartFile.fromPath('file', _imageFile!.path));
 
-    if (response.statusCode == 200) {
-      final responseData = await response.stream.toBytes();
-      final responseString = String.fromCharCodes(responseData);
-      final jsonMap = jsonDecode(responseString);
-      setState(() {
-        _ImageUrl = jsonMap['url'];
-      });
+      // Create a completer to handle the response
+      final completer = Completer<http.Response>();
+      final responseStream = await request.send();
+      final totalBytes = responseStream.contentLength ?? 0;
+      int receivedBytes = 0;
 
-      // Save image URL to local storage
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('profileImageUrl', _ImageUrl!);
-
-      // Redirect to /home
-      if (context.mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Upload failed. Please try again.')),
+      // Collect the response data
+      final chunks = <List<int>>[];
+      responseStream.stream.listen(
+        (List<int> chunk) {
+          // Update progress
+          receivedBytes += chunk.length;
+          if (mounted) {
+            setState(() {
+              _uploadProgress = receivedBytes / totalBytes;
+            });
+          }
+          // Collect chunks for the response
+          chunks.add(chunk);
+        },
+        onDone: () async {
+          // Combine all chunks into a single response
+          final response = http.Response.bytes(
+            chunks.expand((x) => x).toList(),
+            responseStream.statusCode,
+            request: responseStream.request,
+            headers: responseStream.headers,
+            isRedirect: responseStream.isRedirect,
+            persistentConnection: responseStream.persistentConnection,
+            reasonPhrase: responseStream.reasonPhrase,
+          );
+          completer.complete(response);
+        },
+        onError: (e) {
+          completer.completeError(e);
+        },
       );
-    }
 
-    setState(() {
-      _isUploading = false;
-    });
+      // Wait for the response
+      final response =
+          await completer.future.timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final jsonMap = jsonDecode(response.body);
+        if (mounted) {
+          setState(() {
+            _imageUrl = jsonMap['secure_url'] ?? jsonMap['url'];
+          });
+        }
+
+        // Save image URL to local storage
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('profileImageUrl', _imageUrl!);
+
+        // Redirect to /home
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      } else {
+        throw Exception('Upload failed with status: ${response.statusCode}');
+      }
+    } on TimeoutException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Upload timed out. Please try again.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload failed: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -75,81 +149,93 @@ class _SelectProfilePictureScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Upload Profile Picture'),
+        title: const Text(
+          'Upload Profile Picture',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: primaryColor,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Center(
-              child: _imageFile != null
-                  ? CircleAvatar(
-                      radius: avatarSize / 2,
-                      backgroundImage: FileImage(_imageFile!),
-                    )
-                  : CircleAvatar(
-                      radius: avatarSize / 2,
-                      backgroundColor: Colors.grey[300],
-                      child: Icon(Icons.person, size: 60, color: Colors.grey),
-                    ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () => _pickImage(ImageSource.camera),
-              icon: Icon(Icons.camera_alt),
-              label: Text('Take a Picture'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                minimumSize: Size.fromHeight(50),
-              ),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton.icon(
-              onPressed: () => _pickImage(ImageSource.gallery),
-              icon: Icon(Icons.photo_library),
-              label: Text('Choose from Gallery'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                minimumSize: Size.fromHeight(50),
-              ),
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton.icon(
-              onPressed:
-                  _imageFile == null || _isUploading ? null : _uploadToImage,
-              icon: _isUploading
-                  ? SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Center(
+                child: _imageFile != null
+                    ? CircleAvatar(
+                        radius: avatarSize / 2,
+                        backgroundImage: FileImage(_imageFile!),
+                      )
+                    : CircleAvatar(
+                        radius: avatarSize / 2,
+                        backgroundColor: Colors.grey[300],
+                        child: const Icon(Icons.person,
+                            size: 60, color: Colors.grey),
                       ),
-                    )
-                  : Icon(Icons.save),
-              label: Text(_isUploading ? 'Uploading...' : 'Save and Continue'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                minimumSize: Size.fromHeight(50),
               ),
-            ),
-            TextButton(
+              const SizedBox(height: 24),
+              // Upload progress indicator
+              LinearProgressIndicator(
+                value: _uploadProgress,
+                backgroundColor: Colors.grey[300],
+                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed:
+                    _isUploading ? null : () => _pickImage(ImageSource.camera),
+                icon: const Icon(Icons.camera_alt),
+                label: const Text(
+                  'Take a Picture',
+                  style: TextStyle(color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  minimumSize: const Size.fromHeight(50),
+                ),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton.icon(
+                onPressed:
+                    _isUploading ? null : () => _pickImage(ImageSource.gallery),
+                icon: const Icon(Icons.photo_library),
+                label: const Text('Choose from Gallery',
+                    style: TextStyle(color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  minimumSize: const Size.fromHeight(50),
+                ),
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton.icon(
+                onPressed:
+                    _imageFile == null || _isUploading ? null : _uploadToImage,
+                icon: _isUploading
+                    ? SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Icon(Icons.save),
+                label:
+                    Text(_isUploading ? 'Uploading...' : 'Save and Continue'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  minimumSize: const Size.fromHeight(50),
+                ),
+              ),
+              TextButton(
                 onPressed: () {
                   Navigator.pushReplacementNamed(context, '/home');
                 },
-                child: Text('Skip for now')),
-            const SizedBox(height: 20),
-            if (_ImageUrl != null)
-              Column(
-                children: [
-                  Text('Uploaded Image Preview:'),
-                  const SizedBox(height: 8),
-                  Image.network(_ImageUrl!),
-                ],
+                child: const Text('Skip for now'),
               ),
-          ],
+            ],
+          ),
         ),
       ),
     );

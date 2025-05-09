@@ -1,13 +1,15 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/firebase_options.dart';
-import 'package:laptop_harbor/presentation/views/admin/screens/product_list_screen.dart';
+import 'package:laptop_harbor/presentation/views/admin/screens/products_screen.dart';
 import 'package:laptop_harbor/presentation/views/authentication/auth.dart';
 import 'package:laptop_harbor/presentation/views/authentication/forgot_password.dart';
 import 'package:laptop_harbor/presentation/views/authentication/login.dart';
 import 'package:laptop_harbor/presentation/views/authentication/select_profile_picture_screen.dart';
 import 'package:laptop_harbor/presentation/views/authentication/signup.dart';
 import 'package:laptop_harbor/presentation/views/drawer/change_password/change_password.dart';
+import 'package:laptop_harbor/presentation/views/drawer/contact_us/contact_form.dart';
+import 'package:laptop_harbor/presentation/views/drawer/help_faqs/faqs.dart';
 import 'package:laptop_harbor/presentation/views/drawer/profile_section/profile_section.dart';
 import 'package:laptop_harbor/presentation/views/navigation/navigation_wrapper.dart';
 import 'package:laptop_harbor/presentation/views/on_boarding/on_boarding_screen.dart';
@@ -28,12 +30,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       // theme: ThemeData(fontFamily: 'Inter'),
-      // home: SelectProfilePictureScreen(),
+      // home: ProductsScreen(),
       initialRoute: '/splash-screen',
 
       routes: {
         // ADMIN - 1
-        '/admin-home': (context) => const ProductListScreen(),
+        '/admin-home': (context) => ProductsScreen(),
         // AUTHENTICATION - 2
         '/auth': (context) => const Auth(),
         '/forgot-password': (context) => const ForgotPassword(),
@@ -43,7 +45,11 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const Signup(),
         // DRAWER - 3
         '/my-profile': (context) => ProfileSection(),
-        '/change-password': (context) => ChangePassword(),
+        '/change-password': (context) => ChangePassword(),  
+        '/contact-form': (context) => ContactForm(), 
+        '/faqs': (context) => Faqs(), 
+
+
 
         // HOME - 4
         '/home': (context) => const NavigationWrapper(),

@@ -1,11 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 import 'package:laptop_harbor/core/app_colors.dart';
 import 'package:laptop_harbor/utils/toast_msg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 
 class ProfileSection extends StatefulWidget {
   const ProfileSection({super.key});
@@ -22,8 +25,10 @@ class _ProfileSectionState extends State<ProfileSection> {
 
   bool _isLoading = true;
   bool _isSaving = false;
-  String? _originalEmail; // Store the original email for comparison
-  String? _profileImageUrl; // LOAD USER PROFILE
+  bool _isImageUploading = false;
+  String? _originalEmail;
+  String? _profileImageUrl;
+  File? _selectedImageFile;
 
   @override
   void initState() {
@@ -39,47 +44,121 @@ class _ProfileSectionState extends State<ProfileSection> {
     super.dispose();
   }
 
-// get image
-  Future<String?> getProfileImage() async {
-    final prefs = await SharedPreferences.getInstance();
-    // _profileImageUrl = prefs.getString('profileImageUrl');
-
-    return prefs.getString('profileImageUrl');
-  }
-
   Future<void> loadUserDetails() async {
     final user = FirebaseAuth.instance.currentUser;
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (user == null) return;
 
-    if (user != null) {
-      final uid = user.uid;
-      final doc =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    setState(() => _isLoading = true);
 
-      if (doc.exists) {
-        final data = doc.data()!;
+    try {
+      // 1. First try to get from Firestore (primary source)
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (userDoc.exists) {
+        final data = userDoc.data()!;
         _nameController.text = data['name'] ?? '';
         _emailController.text = data['email'] ?? '';
         _phoneController.text = data['phone'] ?? '';
+        _profileImageUrl = data['profileImageUrl'];
         _originalEmail = user.email;
 
+        // Save to SharedPreferences for offline access
+        final prefs = await SharedPreferences.getInstance();
         await prefs.setString('name', _nameController.text);
         await prefs.setString('email', _emailController.text);
         await prefs.setString('phone', _phoneController.text);
+        if (_profileImageUrl != null) {
+          await prefs.setString('profileImageUrl', _profileImageUrl!);
+        }
       } else {
+        // 2. Fallback to SharedPreferences if no Firestore doc exists
+        final prefs = await SharedPreferences.getInstance();
         _nameController.text = prefs.getString('name') ?? '';
         _emailController.text = prefs.getString('email') ?? '';
         _phoneController.text = prefs.getString('phone') ?? '';
+        _profileImageUrl = prefs.getString('profileImageUrl');
         _originalEmail = user.email;
       }
-
-      _profileImageUrl =
-          prefs.getString('profileImageUrl'); // Fetch profile image URL
+    } catch (e) {
+      ToastMsg.showToastMsg('Error loading profile: ${e.toString()}');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
+  }
 
-    setState(() {
-      _isLoading = false;
-    });
+  Future<void> _pickImage() async {
+    try {
+      final pickedFile = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+        maxWidth: 800,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImageFile = File(pickedFile.path);
+        });
+        await _uploadImageToCloudinary();
+      }
+    } catch (e) {
+      ToastMsg.showToastMsg('Error picking image: ${e.toString()}');
+    }
+  }
+
+  Future<void> _uploadImageToCloudinary() async {
+    if (_selectedImageFile == null) return;
+
+    setState(() => _isImageUploading = true);
+
+    try {
+      final url = Uri.parse('https://api.cloudinary.com/v1_1/diu1cxyph/upload');
+      final request = http.MultipartRequest('POST', url)
+        ..fields['upload_preset'] = 'profiles'
+        ..files.add(await http.MultipartFile.fromPath(
+          'file',
+          _selectedImageFile!.path,
+        ));
+
+      final response = await request.send();
+      if (response.statusCode == 200) {
+        final responseData = await response.stream.bytesToString();
+        final jsonMap = jsonDecode(responseData);
+        final imageUrl = jsonMap['secure_url'] ?? jsonMap['url'];
+
+        // Update in Firestore
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update({'profileImageUrl': imageUrl});
+        }
+
+        // Update locally
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('profileImageUrl', imageUrl);
+
+        setState(() {
+          _profileImageUrl = imageUrl;
+          _selectedImageFile = null;
+        });
+
+        ToastMsg.showToastMsg('Profile picture updated successfully!');
+      } else {
+        throw Exception('Upload failed with status: ${response.statusCode}');
+      }
+    } catch (e) {
+      ToastMsg.showToastMsg('Error uploading image: ${e.toString()}');
+    } finally {
+      if (mounted) {
+        setState(() => _isImageUploading = false);
+      }
+    }
   }
 
   Future<String?> _showPasswordDialog() async {
@@ -135,46 +214,46 @@ class _ProfileSectionState extends State<ProfileSection> {
         final uid = user.uid;
         bool emailChanged = newEmail != _originalEmail;
 
-        // 1. Update Firestore first (less critical operation)
-        await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        // Update user data including profile image URL if it exists
+        final updateData = {
           'name': name,
           'email': newEmail,
           'phone': phone,
-        });
+          if (_profileImageUrl != null) 'profileImageUrl': _profileImageUrl,
+        };
 
-        // 2. Update display name in Firebase Auth
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .update(updateData);
+
+        // Update display name in Firebase Auth
         await user.updateDisplayName(name);
 
-        // 3. Handle email update if changed
+        // Handle email update if changed
         if (emailChanged) {
           try {
-            // First try to update directly
             await user.verifyBeforeUpdateEmail(newEmail);
             ToastMsg.showToastMsg(
                 'Verification email sent to your new address. Please verify.');
           } on FirebaseAuthException catch (e) {
             if (e.code == 'requires-recent-login') {
-              // Need reauthentication
               final password = await _showPasswordDialog();
               if (password == null) {
                 throw Exception('Reauthentication cancelled');
               }
 
-              // Create auth credential
               final credential = EmailAuthProvider.credential(
                 email: user.email!,
                 password: password,
               );
 
-              // Reauthenticate
               await user.reauthenticateWithCredential(credential);
-
-              // Retry email update
               await user.verifyBeforeUpdateEmail(newEmail);
               ToastMsg.showToastMsg(
                   'Verification email sent to your new address. Please verify.');
             } else {
-              throw e; // Re-throw other auth errors
+              throw e;
             }
           }
         }
@@ -183,10 +262,13 @@ class _ProfileSectionState extends State<ProfileSection> {
         await prefs.setString('name', name);
         await prefs.setString('email', newEmail);
         await prefs.setString('phone', phone);
+        if (_profileImageUrl != null) {
+          await prefs.setString('profileImageUrl', _profileImageUrl!);
+        }
 
         ToastMsg.showToastMsg('Profile updated successfully!');
         if (!mounted) return;
-        Navigator.pop(context); // Go back instead of replacing to home
+        Navigator.pop(context);
       }
     } on FirebaseAuthException catch (e) {
       String errorMessage = 'Error updating profile: ${e.message}';
@@ -212,7 +294,7 @@ class _ProfileSectionState extends State<ProfileSection> {
       appBar: AppBar(
         backgroundColor: primaryColor,
         title:
-            const Text("Edit Profile", style: TextStyle(color: Colors.white)),
+            const Text("Edit Profile", style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -232,20 +314,27 @@ class _ProfileSectionState extends State<ProfileSection> {
                         Stack(
                           alignment: Alignment.bottomRight,
                           children: [
-                            CircleAvatar(
-                              radius: 60,
-                              backgroundImage: _profileImageUrl != null
-                                  ? NetworkImage(_profileImageUrl!)
-                                  : const AssetImage('assets/user.jpg')
-                                      as ImageProvider,
-                            ),
+                            _isImageUploading
+                                ? Container(
+                                    width: 120,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.grey[200],
+                                    ),
+                                    child: const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  )
+                                : CircleAvatar(
+                                    radius: 60,
+                                    backgroundImage: _getProfileImage(),
+                                  ),
                             Positioned(
                               bottom: 4,
                               right: 4,
                               child: GestureDetector(
-                                onTap: () {
-                                  // TODO: Add image picker
-                                },
+                                onTap: _isImageUploading ? null : _pickImage,
                                 child: Container(
                                   padding: const EdgeInsets.all(6),
                                   decoration: BoxDecoration(
@@ -260,8 +349,7 @@ class _ProfileSectionState extends State<ProfileSection> {
                           ],
                         ),
                         const SizedBox(height: 30),
-
-                        // Name
+                        // Rest of your form fields...
                         TextFormField(
                           controller: _nameController,
                           decoration: _inputDecoration("Name", Icons.person),
@@ -270,8 +358,6 @@ class _ProfileSectionState extends State<ProfileSection> {
                               : null,
                         ),
                         const SizedBox(height: 20),
-
-                        // Email
                         TextFormField(
                           controller: _emailController,
                           decoration: _inputDecoration("Email", Icons.email),
@@ -288,8 +374,6 @@ class _ProfileSectionState extends State<ProfileSection> {
                           },
                         ),
                         const SizedBox(height: 20),
-
-                        // Phone
                         TextFormField(
                           controller: _phoneController,
                           decoration: _inputDecoration("Phone", Icons.phone),
@@ -308,7 +392,6 @@ class _ProfileSectionState extends State<ProfileSection> {
                           },
                         ),
                         const SizedBox(height: 40),
-
                         ElevatedButton(
                           onPressed: _isSaving ? null : _saveProfile,
                           style: ElevatedButton.styleFrom(
@@ -328,7 +411,8 @@ class _ProfileSectionState extends State<ProfileSection> {
                                   ),
                                 )
                               : const Text("Save",
-                                  style: TextStyle(fontSize: 16)),
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.white)),
                         ),
                       ],
                     ),
@@ -337,6 +421,15 @@ class _ProfileSectionState extends State<ProfileSection> {
               ],
             ),
     );
+  }
+
+  ImageProvider? _getProfileImage() {
+    if (_selectedImageFile != null) {
+      return FileImage(_selectedImageFile!);
+    } else if (_profileImageUrl != null) {
+      return NetworkImage(_profileImageUrl!);
+    }
+    return const AssetImage('assets/user.jpg');
   }
 
   InputDecoration _inputDecoration(String label, IconData icon) {
