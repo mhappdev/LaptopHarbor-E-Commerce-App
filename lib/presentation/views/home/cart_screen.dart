@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:laptop_harbor/presentation/providers/cart_provider.dart';
 import 'package:laptop_harbor/presentation/views/home/checkout_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:laptop_harbor/presentation/views/admin/models/product_model.dart';
-
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -24,7 +22,8 @@ class CartScreen extends StatelessWidget {
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text('Clear Cart'),
-                  content: const Text('Are you sure you want to clear your cart?'),
+                  content:
+                      const Text('Are you sure you want to clear your cart?'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
@@ -32,11 +31,12 @@ class CartScreen extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        Provider.of<CartProvider>(context, listen: false).clearCart();
+                        Provider.of<CartProvider>(context, listen: false)
+                            .clearCart();
                         Navigator.pop(context);
                       },
-                      child: const Text('Clear', 
-                        style: TextStyle(color: Colors.red)),
+                      child: const Text('Clear',
+                          style: TextStyle(color: Colors.red)),
                     ),
                   ],
                 ),
@@ -47,14 +47,18 @@ class CartScreen extends StatelessWidget {
       ),
       body: Consumer<CartProvider>(
         builder: (context, cart, child) {
+          // Calculate total quantity of all items in cart
+          int totalQuantity = cart.items.fold(0, (sum, item) => sum + item.quantity);
+          // Calculate shipping cost ($5 per item)
+          double shippingCost = totalQuantity * 5.0;
+
           if (cart.items.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.shopping_cart_outlined, 
-                    size: 64, 
-                    color: Colors.grey),
+                  const Icon(Icons.shopping_cart_outlined,
+                      size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
                   const Text(
                     'Your cart is empty',
@@ -71,9 +75,9 @@ class CartScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xff037EEE),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                          borderRadius: BorderRadius.circular(8)),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
+                          horizontal: 24, vertical: 12),
                     ),
                     child: const Text(
                       'Continue Shopping',
@@ -129,8 +133,8 @@ class CartScreen extends StatelessWidget {
                             // Product Image
                             ClipRRect(
                               borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(12),
-                                bottomLeft: Radius.circular(12)),
+                                  topLeft: Radius.circular(12),
+                                  bottomLeft: Radius.circular(12)),
                               child: Image.network(
                                 item.product.imageUrls.first,
                                 width: 100,
@@ -141,13 +145,13 @@ class CartScreen extends StatelessWidget {
                                   height: 100,
                                   color: Colors.grey[200],
                                   child: const Center(
-                                    child: Icon(Icons.image_not_supported, 
-                                      color: Colors.grey),
+                                    child: Icon(Icons.image_not_supported,
+                                        color: Colors.grey),
                                   ),
                                 ),
                               ),
                             ),
-                            
+
                             // Product Details
                             Expanded(
                               child: Padding(
@@ -158,7 +162,7 @@ class CartScreen extends StatelessWidget {
                                     Text(
                                       item.product.laptopName,
                                       style: const TextStyle(
-                                        fontWeight: FontWeight.w600),
+                                          fontWeight: FontWeight.w600),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -166,21 +170,22 @@ class CartScreen extends StatelessWidget {
                                     Text(
                                       '\$${item.product.price.toStringAsFixed(2)}',
                                       style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold),
                                     ),
                                     const SizedBox(height: 8),
-                                    
+
                                     // Quantity Controls
                                     Row(
                                       children: [
                                         IconButton(
-                                          icon: const Icon(Icons.remove, size: 18),
+                                          icon: const Icon(Icons.remove,
+                                              size: 18),
                                           onPressed: () {
                                             if (item.quantity > 1) {
                                               cart.updateQuantity(
-                                                item.product.id, 
-                                                item.quantity - 1);
+                                                  item.product.id,
+                                                  item.quantity - 1);
                                             }
                                           },
                                           style: IconButton.styleFrom(
@@ -190,18 +195,18 @@ class CartScreen extends StatelessWidget {
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 12),
+                                              horizontal: 12),
                                           child: Text(
                                             item.quantity.toString(),
-                                            style: const TextStyle(fontSize: 16),
+                                            style:
+                                                const TextStyle(fontSize: 16),
                                           ),
                                         ),
                                         IconButton(
                                           icon: const Icon(Icons.add, size: 18),
                                           onPressed: () {
-                                            cart.updateQuantity(
-                                              item.product.id, 
-                                              item.quantity + 1);
+                                            cart.updateQuantity(item.product.id,
+                                                item.quantity + 1);
                                           },
                                           style: IconButton.styleFrom(
                                             backgroundColor: Colors.grey[200],
@@ -221,14 +226,14 @@ class CartScreen extends StatelessWidget {
                   },
                 ),
               ),
-              
+
               // Order Summary
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(16)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
@@ -242,13 +247,12 @@ class CartScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Subtotal', 
-                          style: TextStyle(color: Colors.grey)),
+                        const Text('Subtotal',
+                            style: TextStyle(color: Colors.grey)),
                         Text(
                           '\$${cart.totalPrice.toStringAsFixed(2)}',
                           style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -256,13 +260,12 @@ class CartScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Shipping', 
-                          style: TextStyle(color: Colors.grey)),
+                        const Text('Shipping',
+                            style: TextStyle(color: Colors.grey)),
                         Text(
-                          '\$${(cart.items.length * 5.0).toStringAsFixed(2)}',
+                          '\$${shippingCost.toStringAsFixed(2)}',
                           style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -270,16 +273,15 @@ class CartScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Total', 
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold)),
+                        const Text('Total',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
                         Text(
-                          '\$${(cart.totalPrice + (cart.items.length * 5.0)).toStringAsFixed(2)}',
+                          '\$${(cart.totalPrice + shippingCost).toStringAsFixed(2)}',
                           style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xff037EEE)),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xff037EEE)),
                         ),
                       ],
                     ),
@@ -291,21 +293,21 @@ class CartScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const CheckoutScreen()),
+                                builder: (context) => const CheckoutScreen()),
                           );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xff037EEE),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                              borderRadius: BorderRadius.circular(8)),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         child: const Text(
                           'Proceed to Checkout',
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),

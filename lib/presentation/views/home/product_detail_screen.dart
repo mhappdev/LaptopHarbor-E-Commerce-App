@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:laptop_harbor/presentation/views/admin/models/product_model.dart';

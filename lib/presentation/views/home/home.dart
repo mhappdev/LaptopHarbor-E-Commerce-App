@@ -35,7 +35,7 @@ class _HomeState extends State<Home> {
     'Business',
     'Macbook',
     'Chromebook',
-    'Convertible'
+    'Convertible',
   ];
 
   final List<String> _brands = [
@@ -531,61 +531,130 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildProductCard(Product product) {
-  return Consumer2<CartProvider, WishlistProvider>(
-    builder: (context, cart, wishlist, child) {
-      final isWishlisted = wishlist.isInWishlist(product);
+    return Consumer2<CartProvider, WishlistProvider>(
+      builder: (context, cart, wishlist, child) {
+        final isWishlisted = wishlist.isInWishlist(product);
 
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4), // Left-right padding
-        child: GestureDetector(
-          onTap: () {
-            // Navigate to Product Detail Screen
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ProductDetailScreen(product: product),
-              ),
-            );
-          },
-          child: Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            elevation: 4,
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Product Image with Wishlist Icon
-                  Stack(
-                    children: [
-                      Center(
-                        child: SizedBox(
-                          height: 100,
-                          child: Image.network(
-                            product.imageUrls.first,
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) =>
-                                const Icon(Icons.image_not_supported),
+        return Padding(
+          padding:
+              const EdgeInsets.symmetric(horizontal: 4), // Left-right padding
+          child: GestureDetector(
+            onTap: () {
+              // Navigate to Product Detail Screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProductDetailScreen(product: product),
+                ),
+              );
+            },
+            child: Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              elevation: 4,
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Product Image with Wishlist Icon
+                    Stack(
+                      children: [
+                        Center(
+                          child: SizedBox(
+                            height: 100,
+                            child: Image.network(
+                              product.imageUrls.first,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) =>
+                                  const Icon(Icons.image_not_supported),
+                            ),
                           ),
                         ),
-                      ),
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: IconButton(
-                          icon: Icon(
-                            isWishlisted ? Icons.favorite : Icons.favorite_border,
-                            color: isWishlisted ? Colors.red : Colors.grey,
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: IconButton(
+                            icon: Icon(
+                              isWishlisted
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isWishlisted ? Colors.red : Colors.grey,
+                            ),
+                            onPressed: () {
+                              wishlist.toggleWishlist(product);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    isWishlisted
+                                        ? 'Removed from Wishlist'
+                                        : 'Added to Wishlist',
+                                  ),
+                                  duration: const Duration(seconds: 1),
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                          onPressed: () {
-                            wishlist.toggleWishlist(product);
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Laptop Name
+                    Text(
+                      product.laptopName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+
+                    // Ratings
+                    Row(
+                      children: [
+                        ...List.generate(5, (index) {
+                          return Icon(
+                            index < product.rating.round()
+                                ? Icons.star
+                                : Icons.star_border,
+                            size: 14,
+                            color: Colors.amber,
+                          );
+                        }),
+                        const SizedBox(width: 4),
+                        Text(
+                          product.rating.toStringAsFixed(1),
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Price and Cart Button
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '\$${product.price.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            cart.addToCart(product);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(
-                                  isWishlisted
-                                      ? 'Removed from Wishlist'
-                                      : 'Added to Wishlist',
-                                ),
+                                content:
+                                    Text('${product.laptopName} added to cart'),
                                 duration: const Duration(seconds: 1),
                                 behavior: SnackBarBehavior.floating,
                                 shape: RoundedRectangleBorder(
@@ -594,97 +663,31 @@ class _HomeState extends State<Home> {
                               ),
                             );
                           },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Laptop Name
-                  Text(
-                    product.laptopName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-
-                  // Ratings
-                  Row(
-                    children: [
-                      ...List.generate(5, (index) {
-                        return Icon(
-                          index < product.rating.round()
-                              ? Icons.star
-                              : Icons.star_border,
-                          size: 14,
-                          color: Colors.amber,
-                        );
-                      }),
-                      const SizedBox(width: 4),
-                      Text(
-                        product.rating.toStringAsFixed(1),
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Price and Cart Button
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '\$${product.price.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          cart.addToCart(product);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content:
-                                  Text('${product.laptopName} added to cart'),
-                              duration: const Duration(seconds: 1),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xff037EEE), // Theme color
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          );
-                        },
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xff037EEE), // Theme color
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.shopping_cart_checkout, // 3D-feel icon
-                            size: 18,
-                            color: Colors.white,
+                            child: const Icon(
+                              Icons.shopping_cart_checkout, // 3D-feel icon
+                              size: 18,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      );
-    },
-  );
-}
-
+        );
+      },
+    );
+  }
 
   void _navigateToProductDetail(Product product) {
     HapticFeedback.lightImpact();

@@ -3,7 +3,8 @@ import 'package:laptop_harbor/core/app_colors.dart';
 import 'package:laptop_harbor/presentation/views/home/home.dart';
 import 'package:laptop_harbor/presentation/views/notification/notification_screen.dart';
 import 'package:laptop_harbor/presentation/views/order/order_screen.dart';
-import 'package:laptop_harbor/presentation/views/support/support_screen.dart';
+import 'package:laptop_harbor/presentation/views/support/chat_page.dart';
+// import 'package:laptop_harbor/presentation/views/support/support_screen.dart';
 import 'package:laptop_harbor/presentation/views/wishlist/wishlist.dart';
 
 class NavigationWrapper extends StatefulWidget {
@@ -21,7 +22,7 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
     Wishlist(),
     OrderScreen(),
     NotificationScreen(),
-    SupportScreen(),
+    ChatPage(),
   ];
 
   @override
