@@ -536,7 +536,7 @@ class _HomeState extends State<Home> {
       final isWishlisted = wishlist.isInWishlist(product);
 
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8), // Left-right padding
+        padding: const EdgeInsets.symmetric(horizontal: 4), // Left-right padding
         child: GestureDetector(
           onTap: () {
             // Navigate to Product Detail Screen
