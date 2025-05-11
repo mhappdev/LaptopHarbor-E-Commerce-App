@@ -12,6 +12,7 @@ class Wishlist extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Wishlist'),
+        automaticallyImplyLeading: false,
       ),
       body: wishlist.wishlist.isEmpty
           ? const Center(child: Text('Your wishlist is empty.'))

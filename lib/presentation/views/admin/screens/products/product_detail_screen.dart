@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/presentation/views/admin/firebase/firestore_service.dart';
-import 'package:laptop_harbor/presentation/views/admin/models/product_model.dart';
-import 'package:laptop_harbor/presentation/views/admin/screens/add_product_screen.dart';
+import 'package:laptop_harbor/data/models/product_model.dart';
+import 'package:laptop_harbor/presentation/views/admin/screens/products/add_product_screen.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;

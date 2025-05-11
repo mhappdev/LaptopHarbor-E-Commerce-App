@@ -2,9 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/presentation/providers/cart_provider.dart';
 import 'package:laptop_harbor/presentation/providers/wishlist_provider.dart';
+import 'package:laptop_harbor/presentation/views/admin/screens/products/admin_home.dart';
 import 'package:provider/provider.dart';
 import 'package:laptop_harbor/firebase_options.dart';
-import 'package:laptop_harbor/presentation/views/admin/screens/products_screen.dart';
 import 'package:laptop_harbor/presentation/views/authentication/auth.dart';
 import 'package:laptop_harbor/presentation/views/authentication/forgot_password.dart';
 import 'package:laptop_harbor/presentation/views/authentication/login.dart';
@@ -27,8 +27,6 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => CartProvider()),
         ChangeNotifierProvider(create: (_) => WishlistProvider()),
-        // Add other providers here as needed
-        // ChangeNotifierProvider(create: (context) => AnotherProvider()),
       ],
       child: const MyApp(),
     ),
@@ -48,7 +46,7 @@ class MyApp extends StatelessWidget {
 
       routes: {
         // ADMIN - 1
-        '/admin-home': (context) => ProductsScreen(),
+        '/admin-home': (context) => AdminHome(),
         // AUTHENTICATION - 2
         '/auth': (context) => const Auth(),
         '/forgot-password': (context) => const ForgotPassword(),

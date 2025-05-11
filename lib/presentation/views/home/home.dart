@@ -3,11 +3,11 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/services.dart';
 import 'package:laptop_harbor/presentation/providers/cart_provider.dart';
 import 'package:laptop_harbor/presentation/providers/wishlist_provider.dart';
-import 'package:laptop_harbor/presentation/views/home/cart_screen.dart';
+import 'package:laptop_harbor/presentation/views/order/cart_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:laptop_harbor/presentation/views/admin/models/product_model.dart';
+import 'package:laptop_harbor/data/models/product_model.dart';
 import 'package:laptop_harbor/presentation/views/admin/firebase/firestore_service.dart';
-import 'package:laptop_harbor/presentation/views/admin/screens/product_detail_screen.dart';
+import 'package:laptop_harbor/presentation/views/admin/screens/products/product_detail_screen.dart';
 import 'package:laptop_harbor/presentation/views/drawer/custom_drawer.dart';
 
 class Home extends StatefulWidget {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:laptop_harbor/presentation/views/admin/models/product_model.dart';
+import 'package:laptop_harbor/data/models/product_model.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;

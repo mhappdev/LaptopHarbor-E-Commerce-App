@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:laptop_harbor/presentation/views/admin/models/product_model.dart';
-import 'package:laptop_harbor/presentation/views/admin/models/review_model.dart';
+import 'package:laptop_harbor/data/models/product_model.dart';
+import 'package:laptop_harbor/presentation/views/admin/firebase/review_model.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;

@@ -1,4 +1,4 @@
-import 'package:laptop_harbor/presentation/views/admin/models/product_model.dart';
+import 'package:laptop_harbor/data/models/product_model.dart';
 
 class CartItem {
   final Product product;

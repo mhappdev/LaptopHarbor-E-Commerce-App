@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:laptop_harbor/presentation/views/admin/firebase/firestore_service.dart';
-import 'package:laptop_harbor/presentation/views/admin/models/product_model.dart';
+import 'package:laptop_harbor/data/models/product_model.dart';
 
 class AddProductScreen extends StatefulWidget {
   final Product? initialProduct;

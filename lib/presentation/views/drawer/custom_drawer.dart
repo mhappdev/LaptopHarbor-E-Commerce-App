@@ -14,11 +14,11 @@ class CustomDrawer extends StatefulWidget {
 class _CustomDrawerState extends State<CustomDrawer> {
   Uint8List? webImageBytes;
   File? imageFile;
-
   String userName = 'No Name';
   String userEmail = 'No Email';
   String? userPhone;
-  String? profileImageUrl; // PROFILE
+  String? profileImageUrl;
+  bool _isSigningOut = false;
 
   @override
   void initState() {
@@ -27,7 +27,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
     loadProfileImage();
   }
 
-// LOAD PROFILE PICTURE
   Future<void> loadProfileImage() async {
     final prefs = await SharedPreferences.getInstance();
     final url = prefs.getString('profileImageUrl');
@@ -36,14 +35,13 @@ class _CustomDrawerState extends State<CustomDrawer> {
     });
   }
 
-// LOAD USER DETAILS
   Future<void> loadUserDetails() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userName = prefs.getString('name') ?? 'No Name';
       userEmail = prefs.getString('email') ?? 'No Email';
-      userPhone = prefs.getString('phone'); // May be null
-
+      userPhone = prefs.getString('phone');
+      
       if (kIsWeb) {
         final base64Image = prefs.getString('profile_image_web');
         if (base64Image != null) {
@@ -58,12 +56,39 @@ class _CustomDrawerState extends State<CustomDrawer> {
     });
   }
 
-  // SIGNOUT USER AND ALSO REMOVE DATA FROM SHARED PREFERENCES
   Future<void> signOutUser(BuildContext context) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    setState(() {
+      _isSigningOut = true;
+    });
+
+    try {
+      // Clear SharedPreferences
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+
+      // Sign out from Firebase
+      await FirebaseAuth.instance.signOut();
+
+      // Navigate to login screen and remove all routes
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/login', 
+          (Route<dynamic> route) => false
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error signing out: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSigningOut = false;
+        });
+      }
+    }
   }
 
   @override
@@ -72,7 +97,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Drawer(
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topRight: Radius.circular(40),
           bottomRight: Radius.circular(40),
@@ -98,12 +123,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           ? MemoryImage(webImageBytes!)
                           : imageFile != null
                               ? FileImage(imageFile!)
-                              : (profileImageUrl != null &&
-                                          profileImageUrl!.isNotEmpty
-                                      ? NetworkImage(profileImageUrl!)
-                                      : AssetImage(
-                                          'assets/images/default_avatar.png'))
-                                  as ImageProvider,
+                              : (profileImageUrl != null && profileImageUrl!.isNotEmpty
+                                  ? NetworkImage(profileImageUrl!)
+                                  : const AssetImage('assets/images/default_avatar.png'))
+                                      as ImageProvider,
                     ),
                     SizedBox(width: screenWidth * 0.03),
                     Column(
@@ -132,32 +155,52 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
                 // Drawer Items
                 buildDrawerItem(context, Icons.person, "My Profile", () {
+                  Navigator.pop(context);
                   Navigator.pushNamed(context, '/my-profile');
                 }),
-                buildDrawerItem(context, Icons.lock_reset, "Change Password",
-                    () {
+                buildDrawerItem(context, Icons.lock_reset, "Change Password", () {
+                  Navigator.pop(context);
                   Navigator.pushNamed(context, '/change-password');
                 }),
-                buildDrawerItem(context, Icons.shopping_bag, "My Orders", () {
-                  Navigator.pushNamed(context, '/orders');
-                }),
-
-                buildDrawerItem(context, Icons.credit_card, "Payment Methods",
-                    () {
-                  Navigator.pushNamed(context, '/payments');
-                }),
                 buildDrawerItem(context, Icons.mail_outline, "Contact Us", () {
+                  Navigator.pop(context);
                   Navigator.pushNamed(context, '/contact-form');
                 }),
                 buildDrawerItem(context, Icons.help_outline, "Help & FAQs", () {
+                  Navigator.pop(context);
                   Navigator.pushNamed(context, '/faqs');
                 }),
-                // buildDrawerItem(context, Icons.settings, "Settings", () {
-                //   Navigator.pushNamed(context, '/settings');
-                // }),
-                buildDrawerItem(context, Icons.logout, "Log Out", () {
-                  signOutUser(context);
-                }),
+
+                // Logout Button with loading indicator
+                Column(
+                  children: [
+                    ListTile(
+                      leading: _isSigningOut
+                          ? SizedBox(
+                              width: screenWidth * 0.065,
+                              height: screenWidth * 0.065,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Icon(
+                              Icons.logout,
+                              color: Colors.white,
+                              size: screenWidth * 0.065,
+                            ),
+                      title: Text(
+                        _isSigningOut ? "Signing out..." : "Log Out",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenWidth * 0.04,
+                        ),
+                      ),
+                      onTap: _isSigningOut ? null : () => signOutUser(context),
+                    ),
+                    const Divider(color: Colors.white24, thickness: 1),
+                  ],
+                ),
               ],
             ),
           ),
@@ -185,12 +228,9 @@ class _CustomDrawerState extends State<CustomDrawer> {
               fontSize: screenWidth * 0.04,
             ),
           ),
-          onTap: () {
-            Navigator.pop(context); // Close drawer
-            onTap(); // Perform action
-          },
+          onTap: onTap,
         ),
-        Divider(color: Colors.white24, thickness: 1),
+        const Divider(color: Colors.white24, thickness: 1),
       ],
     );
   }
