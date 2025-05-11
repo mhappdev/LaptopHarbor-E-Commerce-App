@@ -37,7 +37,7 @@ class CustomButton extends StatelessWidget {
               fontFamily: 'LeagueSpartan',
               fontWeight: FontWeight.w500,
               fontSize: 14,
-              color: AppColors.whiteTextColor,
+              color: AppColors.white,
             ),
           ),
         ),

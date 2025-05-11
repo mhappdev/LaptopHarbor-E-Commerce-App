@@ -9,13 +9,14 @@ class CartProvider extends ChangeNotifier {
   int get itemCount => _items.fold(0, (sum, item) => sum + item.quantity);
   double get totalPrice => _items.fold(0, (sum, item) => sum + item.totalPrice);
 
-  void addToCart(Product product) {
-    final existingIndex = _items.indexWhere((item) => item.product.id == product.id);
-    
+  void addToCart(Product product, [int quantity = 1]) {
+    final existingIndex =
+        _items.indexWhere((item) => item.product.id == product.id);
+
     if (existingIndex >= 0) {
-      _items[existingIndex].quantity++;
+      _items[existingIndex].quantity += quantity;
     } else {
-      _items.add(CartItem(product: product));
+      _items.add(CartItem(product: product, quantity: quantity));
     }
     notifyListeners();
   }

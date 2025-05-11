@@ -28,23 +28,47 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _pages[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        backgroundColor: Colors.white,
-        onTap: (index) => setState(() => _currentIndex = index),
-        selectedItemColor: AppColors.blue,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.favorite), label: 'Wish List'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.inventory), label: 'Orders History'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.notifications), label: 'Notifications'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.support_agent), label: 'Support'),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: AppColors.blue,
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(16),
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 4,
+              offset: Offset(0, -2),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius:
+              const BorderRadius.vertical(bottom: Radius.circular(16)),
+          child: BottomNavigationBar(
+            currentIndex: _currentIndex,
+            onTap: (index) => setState(() => _currentIndex = index),
+            backgroundColor: Colors.transparent,
+            selectedItemColor: AppColors.white,
+            unselectedItemColor: AppColors.white.withOpacity(0.7),
+            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+            unselectedLabelStyle:
+                const TextStyle(fontWeight: FontWeight.normal),
+            type: BottomNavigationBarType.fixed,
+            elevation: 0,
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.favorite), label: 'Wish List'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.inventory), label: 'Orders'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.notifications), label: 'Notifications'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.support_agent), label: 'Support'),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:laptop_harbor/core/app_colors.dart';
 import 'package:laptop_harbor/presentation/providers/cart_provider.dart';
 import 'package:laptop_harbor/presentation/views/order/checkout_screen.dart';
 import 'package:provider/provider.dart';
@@ -10,10 +11,18 @@ class CartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Cart', style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-        backgroundColor: const Color(0xff037EEE),
-        foregroundColor: Colors.white,
+        title: const Text(
+          "Your Cart",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: AppColors.blue,
+        foregroundColor: AppColors.white,
+        elevation: 4,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(16),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline),
@@ -48,7 +57,8 @@ class CartScreen extends StatelessWidget {
       body: Consumer<CartProvider>(
         builder: (context, cart, child) {
           // Calculate total quantity of all items in cart
-          int totalQuantity = cart.items.fold(0, (sum, item) => sum + item.quantity);
+          int totalQuantity =
+              cart.items.fold(0, (sum, item) => sum + item.quantity);
           // Calculate shipping cost ($5 per item)
           double shippingCost = totalQuantity * 5.0;
 

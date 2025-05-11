@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:laptop_harbor/core/app_colors.dart';
 import 'package:laptop_harbor/presentation/providers/cart_provider.dart';
 import 'package:laptop_harbor/presentation/views/order/order_tracking_screen.dart';
 import 'package:provider/provider.dart';
@@ -297,22 +298,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       title: const Text('Cash on Delivery'),
                       subtitle: const Text('Pay when you receive the order'),
                     ),
-                    const Divider(),
-                    RadioListTile<String>(
-                      value: 'credit_card',
-                      groupValue: _paymentMethod,
-                      onChanged: (value) {
-                        setState(() {
-                          _paymentMethod = value!;
-                        });
-                      },
-                      activeColor: const Color(0xff037EEE),
-                      title: const Text('Credit/Debit Card'),
-                      subtitle: const Text('Coming soon',
-                          style: TextStyle(color: Colors.grey)),
-                      secondary:
-                          const Icon(Icons.credit_card, color: Colors.grey),
-                    ),
+                    // const Divider(),
+                    // RadioListTile<String>(
+                    //   value: 'credit_card',
+                    //   groupValue: _paymentMethod,
+                    //   onChanged: (value) {
+                    //     setState(() {
+                    //       _paymentMethod = value!;
+                    //     });
+                    //   },
+                    //   activeColor: const Color(0xff037EEE),
+                    //   title: const Text('Credit/Debit Card'),
+                    //   subtitle: const Text('Coming soon',
+                    //       style: TextStyle(color: Colors.grey)),
+                    //   secondary:
+                    //       const Icon(Icons.credit_card, color: Colors.grey),
+                    // ),
                   ],
                 ),
               ),
@@ -476,9 +477,18 @@ class OrderConfirmationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Order Confirmation'),
-        backgroundColor: const Color(0xff037EEE),
-        foregroundColor: Colors.white,
+        title: const Text(
+          "Order Confirmation",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: AppColors.blue,
+        foregroundColor: AppColors.white,
+        elevation: 4,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(16),
+          ),
+        ),
       ),
       body: Center(
         child: Padding(
@@ -547,4 +557,3 @@ class OrderConfirmationScreen extends StatelessWidget {
     );
   }
 }
-

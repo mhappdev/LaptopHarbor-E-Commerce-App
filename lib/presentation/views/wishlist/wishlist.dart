@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:laptop_harbor/core/app_colors.dart';
 import 'package:laptop_harbor/presentation/providers/wishlist_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -11,8 +12,18 @@ class Wishlist extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Wishlist'),
-        automaticallyImplyLeading: false,
+        title: const Text(
+          "My WishList",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: AppColors.blue,
+        foregroundColor: AppColors.white,
+        elevation: 4,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(16),
+          ),
+        ),
       ),
       body: wishlist.wishlist.isEmpty
           ? const Center(child: Text('Your wishlist is empty.'))

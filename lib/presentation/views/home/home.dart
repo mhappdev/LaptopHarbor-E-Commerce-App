@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/services.dart';
+import 'package:laptop_harbor/core/app_colors.dart';
 import 'package:laptop_harbor/presentation/providers/cart_provider.dart';
 import 'package:laptop_harbor/presentation/providers/wishlist_provider.dart';
 import 'package:laptop_harbor/presentation/views/order/cart_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:laptop_harbor/data/models/product_model.dart';
 import 'package:laptop_harbor/presentation/views/admin/firebase/firestore_service.dart';
-import 'package:laptop_harbor/presentation/views/admin/screens/products/product_detail_screen.dart';
+import 'package:laptop_harbor/presentation/views/home/product_detail_screen.dart';
 import 'package:laptop_harbor/presentation/views/drawer/custom_drawer.dart';
 
 class Home extends StatefulWidget {
@@ -158,12 +159,19 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       appBar: AppBar(
-        title:
-            const Text('Laptop Harbor', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Laptop Harbor',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
-        elevation: 0,
-        backgroundColor: const Color(0xff037EEE),
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.blue,
+        foregroundColor: AppColors.white,
+        elevation: 4,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(16),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -537,7 +545,7 @@ class _HomeState extends State<Home> {
 
         return Padding(
           padding:
-              const EdgeInsets.symmetric(horizontal: 4), // Left-right padding
+              const EdgeInsets.symmetric(horizontal: 4), 
           child: GestureDetector(
             onTap: () {
               // Navigate to Product Detail Screen
@@ -667,13 +675,13 @@ class _HomeState extends State<Home> {
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: const Color(0xff037EEE), // Theme color
+                              color: AppColors.blue, // Theme color
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.shopping_cart_checkout, // 3D-feel icon
                               size: 18,
-                              color: Colors.white,
+                              color: AppColors.white,
                             ),
                           ),
                         ),
@@ -686,16 +694,6 @@ class _HomeState extends State<Home> {
           ),
         );
       },
-    );
-  }
-
-  void _navigateToProductDetail(Product product) {
-    HapticFeedback.lightImpact();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProductDetailScreen(product: product),
-      ),
     );
   }
 }

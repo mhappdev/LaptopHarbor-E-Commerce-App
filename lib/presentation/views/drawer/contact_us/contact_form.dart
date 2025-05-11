@@ -16,7 +16,6 @@ class _ContactFormState extends State<ContactForm> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isSubmitting = false;
 
-  // Form controllers
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -47,7 +46,6 @@ class _ContactFormState extends State<ContactForm> {
         'status': 'unread',
       });
 
-      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text(
@@ -63,8 +61,6 @@ class _ContactFormState extends State<ContactForm> {
       );
 
       Navigator.pushNamed(context, '/home');
-
-      // Clear form after submission
       _formKey.currentState!.reset();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -81,6 +77,7 @@ class _ContactFormState extends State<ContactForm> {
   @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
+    final paddingBottom = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
       appBar: AppBar(
@@ -89,180 +86,187 @@ class _ContactFormState extends State<ContactForm> {
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pushNamed(context, '/home'),
+        ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(
-          horizontal:
-              isSmallScreen ? 20 : MediaQuery.of(context).size.width * 0.2,
-          vertical: 30,
-        ),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              // 3D Card Effect
-              PhysicalModel(
-                color: Colors.white,
-                elevation: 15,
-                shadowColor: const Color(0xff037EEE).withOpacity(0.3),
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.all(30),
-                  decoration: BoxDecoration(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: EdgeInsets.only(
+              left: isSmallScreen ? 20 : constraints.maxWidth * 0.2,
+              right: isSmallScreen ? 20 : constraints.maxWidth * 0.2,
+              top: 30,
+              bottom: paddingBottom + 30,
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  PhysicalModel(
                     color: Colors.white,
+                    elevation: 15,
+                    shadowColor: const Color(0xff037EEE).withOpacity(0.3),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: AppColors.blue.withOpacity(0.2),
-                      width: 1,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'Get in Touch',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xff037EEE),
+                    child: Container(
+                      padding: const EdgeInsets.all(30),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: AppColors.blue.withOpacity(0.2),
+                          width: 1,
                         ),
                       ),
-                      const SizedBox(height: 30),
-                      _buildTextField(
-                        controller: _nameController,
-                        label: 'Full Name',
-                        icon: Icons.person,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your name';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      _buildTextField(
-                        controller: _emailController,
-                        label: 'Email Address',
-                        icon: Icons.email,
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your email';
-                          }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                              .hasMatch(value)) {
-                            return 'Please enter a valid email';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      IntlPhoneField(
-                        controller: _phoneController,
-                        decoration: InputDecoration(
-                          labelText: 'Phone Number',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          prefixIcon: Icon(Icons.phone),
-                        ),
-                        initialCountryCode: 'PK', // Default to Pakistan
-                        onChanged: (phone) {
-                          fullPhoneNumber = phone.completeNumber;
-                        },
-                        validator: (phone) {
-                          if (phone == null || phone.number.isEmpty) {
-                            return 'Please enter your phone number';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      _buildMessageField(),
-                      const SizedBox(height: 30),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: _isSubmitting ? null : _submitForm,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xff037EEE),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Get in Touch',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xff037EEE),
                             ),
-                            elevation: 5,
-                            shadowColor:
-                                const Color(0xff037EEE).withOpacity(0.5),
                           ),
-                          child: _isSubmitting
-                              ? const CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                )
-                              : const Text(
-                                  'SUBMIT',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white),
+                          const SizedBox(height: 30),
+                          _buildTextField(
+                            controller: _nameController,
+                            label: 'Full Name',
+                            icon: Icons.person,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your name';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          _buildTextField(
+                            controller: _emailController,
+                            label: 'Email Address',
+                            icon: Icons.email,
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your email';
+                              }
+                              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                  .hasMatch(value)) {
+                                return 'Please enter a valid email';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          IntlPhoneField(
+                            controller: _phoneController,
+                            decoration: InputDecoration(
+                              labelText: 'Phone Number',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              prefixIcon: Icon(Icons.phone),
+                            ),
+                            initialCountryCode: 'PK',
+                            onChanged: (phone) {
+                              fullPhoneNumber = phone.completeNumber;
+                            },
+                            validator: (phone) {
+                              if (phone == null || phone.number.isEmpty) {
+                                return 'Please enter your phone number';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          _buildMessageField(),
+                          const SizedBox(height: 30),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: ElevatedButton(
+                              onPressed: _isSubmitting ? null : _submitForm,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xff037EEE),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                        ),
+                                elevation: 5,
+                                shadowColor:
+                                    const Color(0xff037EEE).withOpacity(0.5),
+                              ),
+                              child: _isSubmitting
+                                  ? const CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    )
+                                  : const Text(
+                                      'SUBMIT',
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white),
+                                    ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 40),
-              // Contact Info Section
-              PhysicalModel(
-                color: Colors.white,
-                elevation: 10,
-                shadowColor: const Color(0xff037EEE).withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.all(25),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: const Color(0xff037EEE).withOpacity(0.1),
                     ),
                   ),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'Other Ways to Reach Us',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xff037EEE),
+                  const SizedBox(height: 40),
+                  PhysicalModel(
+                    color: Colors.white,
+                    elevation: 10,
+                    shadowColor: const Color(0xff037EEE).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.all(25),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xff037EEE).withOpacity(0.1),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      _buildContactInfoItem(
-                        icon: Icons.email,
-                        title: 'Email',
-                        value: 'support@laptopharbor.com',
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Other Ways to Reach Us',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xff037EEE),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          _buildContactInfoItem(
+                            icon: Icons.email,
+                            title: 'Email',
+                            value: 'support@laptopharbor.com',
+                          ),
+                          const SizedBox(height: 15),
+                          _buildContactInfoItem(
+                            icon: Icons.phone,
+                            title: 'Phone',
+                            value: '+1 (555) 123-4567',
+                          ),
+                          const SizedBox(height: 15),
+                          _buildContactInfoItem(
+                            icon: Icons.location_on,
+                            title: 'Address',
+                            value:
+                                'Jameel Jalabi, Road, Block-B Block B North Nazimabad Town, Karachi, 74700',
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 15),
-                      _buildContactInfoItem(
-                        icon: Icons.phone,
-                        title: 'Phone',
-                        value: '+1 (555) 123-4567',
-                      ),
-                      const SizedBox(height: 15),
-                      _buildContactInfoItem(
-                        icon: Icons.location_on,
-                        title: 'Address',
-                        value:
-                            'Jameel Jalabi, Road, Block-B Block B North Nazimabad Town, Karachi, 74700',
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -285,7 +289,6 @@ class _ContactFormState extends State<ContactForm> {
         prefixIcon: Icon(icon, color: const Color(0xff037EEE)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.grey),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -321,7 +324,6 @@ class _ContactFormState extends State<ContactForm> {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.grey),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -341,22 +343,24 @@ class _ContactFormState extends State<ContactForm> {
       children: [
         Icon(icon, color: const Color(0xff037EEE), size: 24),
         const SizedBox(width: 15),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
               ),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 14),
-            ),
-          ],
+              const SizedBox(height: 5),
+              Text(
+                value,
+                style: const TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
         ),
       ],
     );
