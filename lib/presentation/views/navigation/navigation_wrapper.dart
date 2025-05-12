@@ -31,13 +31,15 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppColors.blue,
-          borderRadius: const BorderRadius.vertical(
-            bottom: Radius.circular(16),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
           ),
           boxShadow: const [
             BoxShadow(
               color: Colors.black26,
               blurRadius: 4,
+              spreadRadius: 1,
               offset: Offset(0, -2),
             ),
           ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:laptop_harbor/core/app_colors.dart';
 
 class Faqs extends StatefulWidget {
   const Faqs({super.key});
@@ -73,9 +74,18 @@ class _FaqsState extends State<Faqs> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('FAQs'),
-        backgroundColor: const Color(0xff037EEE),
+        title: const Text(
+          "FAQ's",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: AppColors.blue,
         foregroundColor: Colors.white,
+        elevation: 4,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(16),
+          ),
+        ),
       ),
       body: Column(
         children: [

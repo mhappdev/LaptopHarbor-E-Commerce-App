@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/services.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
 import 'package:laptop_harbor/presentation/providers/cart_provider.dart';
 import 'package:laptop_harbor/presentation/providers/wishlist_provider.dart';
@@ -47,10 +46,6 @@ class _HomeState extends State<Home> {
     'Dell',
     'HP',
     'Lenovo',
-    'Microsoft',
-    'MSI',
-    'Razer',
-    'Samsung',
   ];
 
   final List<String> _priceRanges = [
@@ -544,11 +539,10 @@ class _HomeState extends State<Home> {
         final isWishlisted = wishlist.isInWishlist(product);
 
         return Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 4), 
+          padding: const EdgeInsets.symmetric(
+              horizontal: 12, vertical: 8), // space from screen sides
           child: GestureDetector(
             onTap: () {
-              // Navigate to Product Detail Screen
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -557,15 +551,25 @@ class _HomeState extends State<Home> {
               );
             },
             child: Card(
+              elevation: 6,
+              shadowColor: Colors.black.withOpacity(0.2),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              elevation: 4,
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.white, Colors.grey.shade100],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Product Image with Wishlist Icon
+                    // Product Image and Wishlist
                     Stack(
                       children: [
                         Center(
@@ -593,11 +597,9 @@ class _HomeState extends State<Home> {
                               wishlist.toggleWishlist(product);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(
-                                    isWishlisted
-                                        ? 'Removed from Wishlist'
-                                        : 'Added to Wishlist',
-                                  ),
+                                  content: Text(isWishlisted
+                                      ? 'Removed from Wishlist'
+                                      : 'Added to Wishlist'),
                                   duration: const Duration(seconds: 1),
                                   behavior: SnackBarBehavior.floating,
                                   shape: RoundedRectangleBorder(
@@ -612,17 +614,17 @@ class _HomeState extends State<Home> {
                     ),
                     const SizedBox(height: 8),
 
-                    // Laptop Name
+                    // Laptop Name - max 1 line
                     Text(
                       product.laptopName,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
 
                     // Ratings
                     Row(
@@ -643,7 +645,7 @@ class _HomeState extends State<Home> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
 
                     // Price and Cart Button
                     Row(
@@ -675,11 +677,18 @@ class _HomeState extends State<Home> {
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: AppColors.blue, // Theme color
+                              color: AppColors.blue,
                               borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 6,
+                                  offset: const Offset(2, 4),
+                                )
+                              ],
                             ),
                             child: Icon(
-                              Icons.shopping_cart_checkout, // 3D-feel icon
+                              Icons.shopping_cart_checkout,
                               size: 18,
                               color: AppColors.white,
                             ),

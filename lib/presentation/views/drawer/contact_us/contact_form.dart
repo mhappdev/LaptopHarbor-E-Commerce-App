@@ -81,10 +81,18 @@ class _ContactFormState extends State<ContactForm> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Contact Us'),
+        title: const Text(
+          'Contact Us',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: AppColors.blue,
         foregroundColor: Colors.white,
-        elevation: 0,
+        elevation: 4,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(16),
+          ),
+        ),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),

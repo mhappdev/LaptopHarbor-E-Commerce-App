@@ -41,7 +41,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
       userName = prefs.getString('name') ?? 'No Name';
       userEmail = prefs.getString('email') ?? 'No Email';
       userPhone = prefs.getString('phone');
-      
+
       if (kIsWeb) {
         final base64Image = prefs.getString('profile_image_web');
         if (base64Image != null) {
@@ -71,10 +71,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
       // Navigate to login screen and remove all routes
       if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/login', 
-          (Route<dynamic> route) => false
-        );
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
       }
     } catch (e) {
       if (mounted) {
@@ -123,10 +121,12 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           ? MemoryImage(webImageBytes!)
                           : imageFile != null
                               ? FileImage(imageFile!)
-                              : (profileImageUrl != null && profileImageUrl!.isNotEmpty
-                                  ? NetworkImage(profileImageUrl!)
-                                  : const AssetImage('assets/images/default_avatar.png'))
-                                      as ImageProvider,
+                              : (profileImageUrl != null &&
+                                          profileImageUrl!.isNotEmpty
+                                      ? NetworkImage(profileImageUrl!)
+                                      : const AssetImage(
+                                          'assets/images/default_avatar.png'))
+                                  as ImageProvider,
                     ),
                     SizedBox(width: screenWidth * 0.03),
                     Column(
@@ -158,7 +158,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   Navigator.pop(context);
                   Navigator.pushNamed(context, '/my-profile');
                 }),
-                buildDrawerItem(context, Icons.lock_reset, "Change Password", () {
+                buildDrawerItem(context, Icons.lock_reset, "Change Password",
+                    () {
                   Navigator.pop(context);
                   Navigator.pushNamed(context, '/change-password');
                 }),

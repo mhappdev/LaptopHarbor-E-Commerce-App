@@ -123,7 +123,7 @@ class _ChangePasswordState extends State<ChangePassword> {
 
       // Success
       ToastMsg.showToastMsg("Password changed successfully!");
-      if (mounted) Navigator.pop(context);
+      if (mounted) Navigator.pushNamed(context,'/home');
     } on FirebaseAuthException catch (e) {
       String errorMessage = "Password change failed";
       if (e.code == 'wrong-password') {
@@ -145,14 +145,21 @@ class _ChangePasswordState extends State<ChangePassword> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.blue,
         title: const Text(
           "Change Password",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+         backgroundColor: AppColors.blue,
+        foregroundColor: AppColors.white,
+        elevation: 4,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(16),
+          ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pushNamed(context,'/home'),
         ),
       ),
       body: Padding(

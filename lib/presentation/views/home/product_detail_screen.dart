@@ -26,19 +26,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.blue,
         title: Text(
           widget.product.laptopName,
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share, color: Colors.white),
-            onPressed: () {
-              // Implement share functionality
-            },
+        backgroundColor: AppColors.blue,
+        foregroundColor: AppColors.white,
+        elevation: 4,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(16),
           ),
-        ],
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
