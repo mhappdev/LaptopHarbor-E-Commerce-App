@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:laptop_harbor/presentation/providers/cart_provider.dart';
 import 'package:laptop_harbor/presentation/providers/wishlist_provider.dart';
 import 'package:laptop_harbor/presentation/views/admin/screens/products/admin_home.dart';
+
 import 'package:provider/provider.dart';
 import 'package:laptop_harbor/firebase_options.dart';
 import 'package:laptop_harbor/presentation/views/authentication/auth.dart';
@@ -21,6 +22,7 @@ import 'package:laptop_harbor/presentation/views/splash_screen/splash_screen.dar
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Initialize notification service
 
   runApp(
     MultiProvider(

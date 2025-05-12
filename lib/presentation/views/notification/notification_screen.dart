@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
 
+
 class NotificationScreen extends StatelessWidget {
   const NotificationScreen({super.key});
 
@@ -26,7 +27,7 @@ class NotificationScreen extends StatelessWidget {
           'COMING SOON!',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
-      ),
-    );
+      ), 
+    ); 
   }
 }

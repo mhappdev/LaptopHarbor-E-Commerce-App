@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
+import 'package:laptop_harbor/utils/status_chip_helper.dart';
 
 class OrderTrackingScreen extends StatelessWidget {
   final String orderId;
@@ -8,7 +9,7 @@ class OrderTrackingScreen extends StatelessWidget {
   const OrderTrackingScreen({super.key, required this.orderId});
 
   @override
-  Widget build(BuildContext context) { 
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -80,9 +81,15 @@ class OrderTrackingScreen extends StatelessWidget {
                             Chip(
                               label: Text(
                                 orderData['status'].toString().toUpperCase(),
-                                style: const TextStyle(color: Colors.white),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
                               ),
-                              backgroundColor: const Color(0xff037EEE),
+                              backgroundColor:
+                                  getStatusChipColor(orderData['status']),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
                             ),
                           ],
                         ),
