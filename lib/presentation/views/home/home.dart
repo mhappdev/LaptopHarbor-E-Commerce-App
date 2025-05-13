@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
@@ -151,6 +152,34 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 600;
+
+    // Add this method to your _HomeState class to fetch reviews for a product
+    Future<Map<String, dynamic>> _fetchProductReviews(String productId) async {
+      try {
+        final reviewsSnapshot = await FirebaseFirestore.instance
+            .collection('userreviews')
+            .where('productId', isEqualTo: productId)
+            .get();
+
+        if (reviewsSnapshot.docs.isEmpty) {
+          return {'averageRating': 0.0, 'reviewCount': 0};
+        }
+
+        double totalRating = 0;
+        for (var doc in reviewsSnapshot.docs) {
+          totalRating += (doc.data()['rating'] as num).toDouble();
+        }
+
+        final averageRating = totalRating / reviewsSnapshot.docs.length;
+        return {
+          'averageRating': averageRating,
+          'reviewCount': reviewsSnapshot.docs.length,
+        };
+      } catch (e) {
+        print('Error fetching reviews: $e');
+        return {'averageRating': 0.0, 'reviewCount': 0};
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -533,174 +562,221 @@ class _HomeState extends State<Home> {
     );
   }
 
+  // Add this method to your _HomeState class to fetch reviews for a product
+  Future<Map<String, dynamic>> _fetchProductReviews(String productId) async {
+    try {
+      final reviewsSnapshot = await FirebaseFirestore.instance
+          .collection('userreviews')
+          .where('productId', isEqualTo: productId)
+          .get();
+
+      if (reviewsSnapshot.docs.isEmpty) {
+        return {'averageRating': 0.0, 'reviewCount': 0};
+      }
+
+      double totalRating = 0;
+      for (var doc in reviewsSnapshot.docs) {
+        totalRating += (doc.data()['rating'] as num).toDouble();
+      }
+
+      final averageRating = totalRating / reviewsSnapshot.docs.length;
+      return {
+        'averageRating': averageRating,
+        'reviewCount': reviewsSnapshot.docs.length,
+      };
+    } catch (e) {
+      print('Error fetching reviews: $e');
+      return {'averageRating': 0.0, 'reviewCount': 0};
+    }
+  }
+
+// Modify your _buildProductCard method to use the fetched reviews
   Widget _buildProductCard(Product product) {
-    return Consumer2<CartProvider, WishlistProvider>(
-      builder: (context, cart, wishlist, child) {
-        final isWishlisted = wishlist.isInWishlist(product);
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _fetchProductReviews(product.id),
+      builder: (context, snapshot) {
+        final ratingData =
+            snapshot.data ?? {'averageRating': 0.0, 'reviewCount': 0};
+        final averageRating = ratingData['averageRating'];
+        final reviewCount = ratingData['reviewCount'];
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 12, vertical: 8), // space from screen sides
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProductDetailScreen(product: product),
-                ),
-              );
-            },
-            child: Card(
-              elevation: 6,
-              shadowColor: Colors.black.withOpacity(0.2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.white, Colors.grey.shade100],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+        return Consumer2<CartProvider, WishlistProvider>(
+          builder: (context, cart, wishlist, child) {
+            final isWishlisted = wishlist.isInWishlist(product);
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ProductDetailScreen(product: product),
+                    ),
+                  );
+                },
+                child: Card(
+                  elevation: 6,
+                  shadowColor: Colors.black.withOpacity(0.2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Product Image and Wishlist
-                    Stack(
-                      children: [
-                        Center(
-                          child: SizedBox(
-                            height: 100,
-                            child: Image.network(
-                              product.imageUrls.first,
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) =>
-                                  const Icon(Icons.image_not_supported),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          top: 0,
-                          right: 0,
-                          child: IconButton(
-                            icon: Icon(
-                              isWishlisted
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: isWishlisted ? Colors.red : Colors.grey,
-                            ),
-                            onPressed: () {
-                              wishlist.toggleWishlist(product);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(isWishlisted
-                                      ? 'Removed from Wishlist'
-                                      : 'Added to Wishlist'),
-                                  duration: const Duration(seconds: 1),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-
-                    // Laptop Name - max 1 line
-                    Text(
-                      product.laptopName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.white, Colors.grey.shade100],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    const SizedBox(height: 4),
-
-                    // Ratings
-                    Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ...List.generate(5, (index) {
-                          return Icon(
-                            index < product.rating.round()
-                                ? Icons.star
-                                : Icons.star_border,
-                            size: 14,
-                            color: Colors.amber,
-                          );
-                        }),
-                        const SizedBox(width: 4),
-                        Text(
-                          product.rating.toStringAsFixed(1),
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-
-                    // Price and Cart Button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '\$${product.price.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            cart.addToCart(product);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content:
-                                    Text('${product.laptopName} added to cart'),
-                                duration: const Duration(seconds: 1),
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                        // Product Image and Wishlist
+                        Stack(
+                          children: [
+                            Center(
+                              child: SizedBox(
+                                height: 100,
+                                child: Image.network(
+                                  product.imageUrls.first,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (_, __, ___) =>
+                                      const Icon(Icons.image_not_supported),
                                 ),
                               ),
-                            );
-                          },
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: AppColors.blue,
-                              borderRadius: BorderRadius.circular(8),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 6,
-                                  offset: const Offset(2, 4),
-                                )
-                              ],
                             ),
-                            child: Icon(
-                              Icons.shopping_cart_checkout,
-                              size: 18,
-                              color: AppColors.white,
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: IconButton(
+                                icon: Icon(
+                                  isWishlisted
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color:
+                                      isWishlisted ? Colors.red : Colors.grey,
+                                ),
+                                onPressed: () {
+                                  wishlist.toggleWishlist(product);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(isWishlisted
+                                          ? 'Removed from Wishlist'
+                                          : 'Added to Wishlist'),
+                                      duration: const Duration(seconds: 1),
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Laptop Name - max 1 line
+                        Text(
+                          product.laptopName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+
+                        // Ratings - Updated to use fetched reviews
+                        Row(
+                          children: [
+                            ...List.generate(5, (index) {
+                              return Icon(
+                                index < averageRating.round()
+                                    ? Icons.star
+                                    : Icons.star_border,
+                                size: 14,
+                                color: Colors.amber,
+                              );
+                            }),
+                            const SizedBox(width: 4),
+                            Text(
+                              averageRating.toStringAsFixed(1),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            if (reviewCount > 0) ...[
+                              const SizedBox(width: 4),
+                              Text(
+                                '($reviewCount)',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Price and Cart Button
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '\$${product.price.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                cart.addToCart(product);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                        '${product.laptopName} added to cart'),
+                                    duration: const Duration(seconds: 1),
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                );
+                              },
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: AppColors.blue,
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 6,
+                                      offset: const Offset(2, 4),
+                                    )
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.shopping_cart_checkout,
+                                  size: 18,
+                                  color: AppColors.white,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -742,27 +818,50 @@ class ProductSearchDelegate extends SearchDelegate {
       itemCount: results.length,
       itemBuilder: (context, index) {
         final product = results[index];
-        return ListTile(
-          leading: Hero(
-            tag: 'search-image-${product.id}',
-            child: CircleAvatar(
-              backgroundImage: product.imageUrls.isNotEmpty
-                  ? NetworkImage(product.imageUrls.first)
-                  : const AssetImage('assets/images/placeholder.png')
-                      as ImageProvider,
-            ),
-          ),
-          title: Text(product.laptopName),
-          subtitle: Text(
-            '\$${product.price.toStringAsFixed(2)} • ${product.rating} ⭐',
-          ),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ProductDetailScreen(product: product),
+        return FutureBuilder<Map<String, dynamic>>(
+          future: FirebaseFirestore.instance
+              .collection('userreviews')
+              .where('productId', isEqualTo: product.id)
+              .get()
+              .then((snapshot) {
+            if (snapshot.docs.isEmpty) {
+              return {'averageRating': 0.0, 'reviewCount': 0};
+            }
+            double totalRating = 0;
+            for (var doc in snapshot.docs) {
+              totalRating += (doc.data()['rating'] as num).toDouble();
+            }
+            return {
+              'averageRating': totalRating / snapshot.docs.length,
+              'reviewCount': snapshot.docs.length,
+            };
+          }),
+          builder: (context, snapshot) {
+            final ratingData =
+                snapshot.data ?? {'averageRating': 0.0, 'reviewCount': 0};
+            return ListTile(
+              leading: Hero(
+                tag: 'search-image-${product.id}',
+                child: CircleAvatar(
+                  backgroundImage: product.imageUrls.isNotEmpty
+                      ? NetworkImage(product.imageUrls.first)
+                      : const AssetImage('assets/images/placeholder.png')
+                          as ImageProvider,
+                ),
               ),
+              title: Text(product.laptopName),
+              subtitle: Text(
+                '\$${product.price.toStringAsFixed(2)} • ${ratingData['averageRating'].toStringAsFixed(1)} ⭐ (${ratingData['reviewCount']})',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProductDetailScreen(product: product),
+                  ),
+                );
+              },
             );
           },
         );
