@@ -29,6 +29,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => CartProvider()),
         ChangeNotifierProvider(create: (_) => WishlistProvider()),
+
       ],
       child: const MyApp(),
     ),
