@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
 
 class CustomDrawer extends StatefulWidget {
   @override
@@ -115,18 +117,36 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 // Profile Info
                 Row(
                   children: [
-                    CircleAvatar(
-                      radius: screenWidth * 0.08,
-                      backgroundImage: webImageBytes != null
-                          ? MemoryImage(webImageBytes!)
-                          : imageFile != null
-                              ? FileImage(imageFile!)
-                              : (profileImageUrl != null &&
-                                          profileImageUrl!.isNotEmpty
-                                      ? NetworkImage(profileImageUrl!)
-                                      : const AssetImage(
-                                          'assets/images/default_avatar.png'))
-                                  as ImageProvider,
+                    SizedBox(
+                      width: screenWidth * 0.16,
+                      height: screenWidth * 0.16,
+                      child: ClipOval(
+                        child: webImageBytes != null
+                            ? Image.memory(webImageBytes!, fit: BoxFit.cover)
+                            : imageFile != null
+                                ? Image.file(imageFile!, fit: BoxFit.cover)
+                                : profileImageUrl != null &&
+                                        profileImageUrl!.isNotEmpty
+                                    ? CachedNetworkImage(
+                                        imageUrl: profileImageUrl!,
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) =>
+                                            Shimmer.fromColors(
+                                          baseColor: Colors.grey[300]!,
+                                          highlightColor: Colors.grey[100]!,
+                                          child: Container(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            Image.asset(
+                                                'assets/images/default_avatar.png',
+                                                fit: BoxFit.cover),
+                                      )
+                                    : Image.asset(
+                                        'assets/images/default_avatar.png',
+                                        fit: BoxFit.cover),
+                      ),
                     ),
                     SizedBox(width: screenWidth * 0.03),
                     Column(

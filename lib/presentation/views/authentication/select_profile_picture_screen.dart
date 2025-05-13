@@ -22,6 +22,7 @@ class _SelectProfilePictureScreenState
   final Color primaryColor = AppColors.blue;
   bool _isUploading = false;
   double _uploadProgress = 0;
+  bool _hasError = false;
 
   Future<void> _pickImage(ImageSource source) async {
     try {
@@ -35,6 +36,7 @@ class _SelectProfilePictureScreenState
       if (pickedFile != null) {
         setState(() {
           _imageFile = File(pickedFile.path);
+          _hasError = false; // Reset error state when a new image is selected
         });
       }
     } catch (e) {
@@ -52,6 +54,7 @@ class _SelectProfilePictureScreenState
     setState(() {
       _isUploading = true;
       _uploadProgress = 0;
+      _hasError = false; // Reset error state when upload starts
     });
 
     try {
@@ -75,7 +78,7 @@ class _SelectProfilePictureScreenState
           receivedBytes += chunk.length;
           if (mounted) {
             setState(() {
-              _uploadProgress = receivedBytes / totalBytes;
+              _uploadProgress = totalBytes > 0 ? receivedBytes / totalBytes : 0;
             });
           }
           // Collect chunks for the response
@@ -128,12 +131,18 @@ class _SelectProfilePictureScreenState
           const SnackBar(content: Text('Upload timed out. Please try again.')),
         );
       }
+      setState(() {
+        _hasError = true; // Show error on failure
+      });
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Upload failed: ${e.toString()}')),
         );
       }
+      setState(() {
+        _hasError = true; // Show error on failure
+      });
     } finally {
       if (mounted) {
         setState(() {
@@ -176,11 +185,27 @@ class _SelectProfilePictureScreenState
               ),
               const SizedBox(height: 24),
               // Upload progress indicator
-              LinearProgressIndicator(
-                value: _uploadProgress,
-                backgroundColor: Colors.grey[300],
-                valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-              ),
+              _hasError
+                  ? AnimatedOpacity(
+                      opacity: _hasError ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 500),
+                      child: Container(
+                        width: double.infinity,
+                        height: 4,
+                        color: Colors.red,
+                        child: const Center(
+                          child: Text(
+                            'Error occurred!',
+                            style: TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        ),
+                      ),
+                    )
+                  : LinearProgressIndicator(
+                      value: _uploadProgress,
+                      backgroundColor: Colors.grey[300],
+                      valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                    ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 onPressed:

@@ -268,7 +268,7 @@ class _ProfileSectionState extends State<ProfileSection> {
 
         ToastMsg.showToastMsg('Profile updated successfully!');
         if (!mounted) return;
-        Navigator.pushNamed(context,'/home');
+        Navigator.pushNamed(context, '/home');
       }
     } on FirebaseAuthException catch (e) {
       String errorMessage = 'Error updating profile: ${e.message}';
@@ -292,7 +292,7 @@ class _ProfileSectionState extends State<ProfileSection> {
 
     return Scaffold(
       appBar: AppBar(
-          title: const Text(
+        title: const Text(
           "Edit Profile",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
@@ -306,7 +306,7 @@ class _ProfileSectionState extends State<ProfileSection> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pushNamed(context,'/home'),
+          onPressed: () => Navigator.pushNamed(context, '/home'),
         ),
       ),
       body: _isLoading
@@ -438,7 +438,7 @@ class _ProfileSectionState extends State<ProfileSection> {
     } else if (_profileImageUrl != null) {
       return NetworkImage(_profileImageUrl!);
     }
-    return const AssetImage('assets/user.jpg');
+    return const AssetImage('assets/images/default_avatar.png');
   }
 
   InputDecoration _inputDecoration(String label, IconData icon) {
