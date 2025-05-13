@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:laptop_harbor/data/models/product_model.dart';
@@ -8,7 +8,8 @@ import 'package:laptop_harbor/presentation/views/order/checkout_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart'; // For better date formatting
+import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart'; // For better date formatting
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
@@ -509,10 +510,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 5.0),
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
-                    image: DecorationImage(
-                      image: NetworkImage(imageUrl),
-                      fit: BoxFit.contain,
+                  ),
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.contain,
+                    placeholder: (context, url) => Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        color: Colors.white,
+                      ),
                     ),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.error),
                   ),
                 );
               },

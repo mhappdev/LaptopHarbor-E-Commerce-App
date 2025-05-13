@@ -82,10 +82,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Order #$orderId placed successfully!'),
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 2),
         ),
       );
 
+// Delay before navigating
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -405,7 +409,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                 ),
               ),
-              const SizedBox(height: 32), // Added more spacing here
+              const SizedBox(height: 62), // Added more spacing here
             ],
           ),
         ),
@@ -436,68 +440,70 @@ class OrderConfirmationScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 100),
-              const SizedBox(height: 24),
-              const Text(
-                'Order Placed Successfully!',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Your order ID is: #$orderId',
-                style: const TextStyle(fontSize: 18),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'You will receive a confirmation email shortly. Thank you for shopping with us!',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pushNamed(context, '/home'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff037EEE),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 100),
+                const SizedBox(height: 24),
+                const Text(
+                  'Order Placed Successfully!',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Your order ID is: #$orderId',
+                  style: const TextStyle(fontSize: 18),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'You will receive a confirmation email shortly. Thank you for shopping with us!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pushNamed(context, '/home'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff037EEE),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Back to Home',
+                      style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ),
-                  child: const Text(
-                    'Back to Home',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          OrderTrackingScreen(orderId: orderId),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            OrderTrackingScreen(orderId: orderId),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    'Track Your Order',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.blue,
                     ),
-                  );
-                },
-                child: Text(
-                  'Track Your Order',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppColors.blue,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

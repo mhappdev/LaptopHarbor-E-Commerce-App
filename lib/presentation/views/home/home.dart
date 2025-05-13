@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -10,6 +11,7 @@ import 'package:laptop_harbor/data/models/product_model.dart';
 import 'package:laptop_harbor/presentation/views/admin/firebase/firestore_service.dart';
 import 'package:laptop_harbor/presentation/views/home/product_detail_screen.dart';
 import 'package:laptop_harbor/presentation/views/drawer/custom_drawer.dart';
+import 'package:shimmer/shimmer.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -324,42 +326,60 @@ class _HomeState extends State<Home> {
       );
 
   Widget _buildBannerSlider() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: CarouselSlider(
-        options: CarouselOptions(
-          height: 160,
-          autoPlay: true,
-          enlargeCenterPage: true,
-          viewportFraction: 0.95,
-          autoPlayInterval: const Duration(seconds: 5),
-        ),
-        items: [
-          'assets/images/banner1.jpg',
-          'assets/images/banner2.jpg',
-          'assets/images/banner3.jpg',
-        ].map((asset) {
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              image: DecorationImage(
-                image: AssetImage(asset),
-                fit: BoxFit.cover,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 6,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
+  final List<String> bannerUrls = [
+  'https://images.pexels.com/photos/7974/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+  'https://images.pexels.com/photos/1438081/pexels-photo-1438081.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+  'https://images.pexels.com/photos/941555/pexels-photo-941555.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+];
+
+
+  return Container(
+    margin: const EdgeInsets.only(bottom: 16),
+    child: CarouselSlider(
+      options: CarouselOptions(
+        height: 160,
+        autoPlay: true,
+        enlargeCenterPage: true,
+        viewportFraction: 0.95,
+        autoPlayInterval: const Duration(seconds: 5),
       ),
-    );
-  }
+      items: bannerUrls.map((url) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 6,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: CachedNetworkImage(
+              imageUrl: url,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              placeholder: (context, url) => Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Container(
+                  width: double.infinity,
+                  height: 160,
+                  color: Colors.white,
+                ),
+              ),
+              errorWidget: (context, url, error) =>
+                  const Center(child: Icon(Icons.error)),
+            ),
+          ),
+        );
+      }).toList(),
+    ),
+  );
+}
 
   Widget _buildFilterRow(bool isLargeScreen) {
     return Column(
@@ -641,10 +661,20 @@ class _HomeState extends State<Home> {
                             Center(
                               child: SizedBox(
                                 height: 100,
-                                child: Image.network(
-                                  product.imageUrls.first,
+                                child: CachedNetworkImage(
+                                  imageUrl: product.imageUrls.first,
                                   fit: BoxFit.contain,
-                                  errorBuilder: (_, __, ___) =>
+                                  placeholder: (context, url) =>
+                                      Shimmer.fromColors(
+                                    baseColor: Colors.grey[300]!,
+                                    highlightColor: Colors.grey[100]!,
+                                    child: Container(
+                                      color: Colors.white,
+                                      width: double.infinity,
+                                      height: 100,
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
                                       const Icon(Icons.image_not_supported),
                                 ),
                               ),
@@ -664,9 +694,11 @@ class _HomeState extends State<Home> {
                                   wishlist.toggleWishlist(product);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text(isWishlisted
-                                          ? 'Removed from Wishlist'
-                                          : 'Added to Wishlist'),
+                                      content: Text(
+                                        isWishlisted
+                                            ? 'Removed from Wishlist'
+                                            : 'Added to Wishlist',
+                                      ),
                                       duration: const Duration(seconds: 1),
                                       behavior: SnackBarBehavior.floating,
                                       shape: RoundedRectangleBorder(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
 import 'package:laptop_harbor/presentation/views/home/home.dart';
-import 'package:laptop_harbor/presentation/views/notification/notification_screen.dart';
+// import 'package:laptop_harbor/presentation/views/notification/notification_screen.dart';
 import 'package:laptop_harbor/presentation/views/order/orders_history_screen.dart';
 import 'package:laptop_harbor/presentation/views/support/chat_page.dart';
 import 'package:laptop_harbor/presentation/views/wishlist/wishlist.dart';
@@ -20,7 +20,7 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
     Home(),
     Wishlist(),
     OrdersHistoryScreen(),
-    NotificationScreen(),
+    // NotificationScreen(),
     ChatPage(),
   ];
 
@@ -64,8 +64,8 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
                   icon: Icon(Icons.favorite), label: 'Wish List'),
               BottomNavigationBarItem(
                   icon: Icon(Icons.inventory), label: 'Orders'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.notifications), label: 'Notifications'),
+              // BottomNavigationBarItem(
+              //     icon: Icon(Icons.notifications), label: 'Notifications'),
               BottomNavigationBarItem(
                   icon: Icon(Icons.support_agent), label: 'Support'),
             ],
