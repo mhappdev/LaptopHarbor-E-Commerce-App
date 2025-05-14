@@ -1,5 +1,3 @@
-// show all reviews
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -30,11 +28,10 @@ class OrdersHistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading : false,
+        automaticallyImplyLeading: false,
         title: const Text(
           "My Orders History",
           style: TextStyle(fontWeight: FontWeight.bold),
-          
         ),
         backgroundColor: AppColors.blue,
         foregroundColor: AppColors.white,
