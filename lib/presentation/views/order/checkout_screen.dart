@@ -145,6 +145,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         'status': 'processing',
         'orderDate': formattedDate,
         'timestamp': FieldValue.serverTimestamp(),
+        'statusChanged': false,
       };
 
       await FirebaseFirestore.instance
