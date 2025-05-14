@@ -86,7 +86,8 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
                   onPressed: _isSubmitting
                       ? null
                       : () async {
-                          if (_formKey.currentState!.validate() && _rating > 0) {
+                          if (_formKey.currentState!.validate() &&
+                              _rating > 0) {
                             await _submitReview();
                           } else if (_rating == 0) {
                             ScaffoldMessenger.of(context).showSnackBar(

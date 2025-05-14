@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
 import 'package:laptop_harbor/core/images_path.dart';
-import 'package:laptop_harbor/presentation/widgets/on_boarding/custom_button.dart';
-import 'package:laptop_harbor/presentation/widgets/on_boarding/onboarding_page.dart';
+import 'package:laptop_harbor/presentation/widgets/custom_button.dart';
+import 'package:laptop_harbor/presentation/widgets/onboarding_page.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class OnBoardingScreen extends StatefulWidget {

@@ -611,7 +611,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           return Icon(
                             Icons.star,
                             size: 16,
-                            color: index < (review['rating'] as int)
+                            color: index < (review['rating'] as num).toDouble()
                                 ? Colors.amber
                                 : Colors.grey[300],
                           );
