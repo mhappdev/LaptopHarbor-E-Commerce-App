@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
@@ -6,6 +7,7 @@ import 'package:laptop_harbor/presentation/providers/cart_provider.dart';
 import 'package:laptop_harbor/presentation/views/order/order_tracking_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -20,8 +22,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
+
   String _paymentMethod = 'cash_on_delivery';
   bool _isProcessing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserDetails();
+  }
+
+  Future<void> loadUserDetails() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    _nameController.text = prefs.getString('name') ?? '';
+    _emailController.text = prefs.getString('email') ?? '';
+    _phoneController.text = prefs.getString('phone') ?? '';
+    print(prefs.getString('phone'));
+  }
 
   @override
   void dispose() {
@@ -38,6 +58,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     setState(() => _isProcessing = true);
 
     try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception("User not logged in");
+
       final totalQuantity =
           cart.items.fold(0, (sum, item) => sum + item.quantity);
       final shippingCost = totalQuantity * 5.0;
@@ -48,6 +71,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
 
       final orderData = {
+        'uid': user.uid, // ✅ Add this line to link order with user
         'orderId': orderId,
         'customerName': _nameController.text,
         'customerPhone': _phoneController.text,
@@ -133,6 +157,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     value?.isEmpty ?? true ? 'Please enter your name' : null,
               ),
               const SizedBox(height: 12),
+              //
               TextFormField(
                 controller: _phoneController,
                 decoration: const InputDecoration(
