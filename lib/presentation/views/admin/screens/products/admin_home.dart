@@ -72,7 +72,7 @@ class AdminHome extends StatelessWidget {
               icon: Icons.analytics_outlined,
               title: 'Logout',
               onTap: () {
-               signOutUser(context);
+                signOutUser(context);
               },
             ),
           ],

@@ -49,7 +49,14 @@ class ProductsScreen extends StatelessWidget {
               final product = products[index];
               return ProductCard(
                 product: product,
-                onTap: () {},
+                onTap: () {
+                   Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProductDetailScreen(product: product),
+                    ),
+                  );
+                },
               );
             },
           );
@@ -61,10 +68,13 @@ class ProductsScreen extends StatelessWidget {
 
 class ProductCard extends StatelessWidget {
   final Product product;
+   final VoidCallback onTap;
 
-  const ProductCard(
-      {Key? key, required this.product, required Null Function() onTap})
-      : super(key: key);
+   const ProductCard({
+    Key? key,
+    required this.product,
+    required this.onTap,
+  }) :  super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -87,10 +97,18 @@ class ProductCard extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.edit, color: Colors.blue),
               onPressed: () {
-                Navigator.push(
+                   Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ProductDetailScreen(product: product),
+                    builder: (context) => AddProductScreen(
+                      initialProduct: product,
+                      onProductUpdated: (updatedProduct) {
+                        // This callback will be triggered when the product is updated
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Product updated successfully')),
+                        );
+                      },
+                    ),
                   ),
                 );
               },
@@ -103,14 +121,7 @@ class ProductCard extends StatelessWidget {
             ),
           ],
         ),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProductDetailScreen(product: product),
-            ),
-          );
-        },
+        onTap: onTap,
       ),
     );
   }
