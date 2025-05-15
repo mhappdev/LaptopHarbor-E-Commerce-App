@@ -5,3 +5,4 @@ class ImagesPath {
   static String onBoardingImgTwo = 'assets/images/Track Order.svg';
   static String onBoardingImgThree = 'assets/images/Get your order.svg';
 }
+

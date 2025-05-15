@@ -18,14 +18,14 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   final pages = [
     // 1st screen
     OnboardingPage(
-      imagePath: ImagesPath.onBoardingImgTwo,
+      imagePath: ImagesPath.onBoardingImgOne,
       title: 'Purchase Online !!',
       description:
           "Explore a wide range of premium laptops and accessories. Compare specs, check reviews, and shop with confidence—all in one place.",
     ),
     // 2nd screen
     OnboardingPage(
-      imagePath: ImagesPath.onBoardingImgThree,
+      imagePath: ImagesPath.onBoardingImgTwo,
       title: 'Track Order !!',
       description:
           'Stay updated every step of the way. Track your orders in real-time and get notified instantly.',

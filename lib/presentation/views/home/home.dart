@@ -306,7 +306,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-Widget _buildLoadingState() => Center(
+  Widget _buildLoadingState() => Center(
         child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(const Color(0xff037EEE)),
         ),
