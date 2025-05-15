@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:laptop_harbor/core/app_colors.dart';
+import 'package:laptop_harbor/core/app_constants.dart';
 import 'package:laptop_harbor/utils/toast_msg.dart';
 
 class ForgotPassword extends StatefulWidget {
@@ -12,8 +14,6 @@ class ForgotPassword extends StatefulWidget {
 class _ForgotPasswordState extends State<ForgotPassword> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
-
-  final Color primaryColor = const Color(0xff037EEE);
   bool _isSubmitted = false;
 
   @override
@@ -34,7 +34,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         ToastMsg.showToastMsg(
             'If this email is registered, a reset link has been sent.');
       } catch (error) {
-        // Handle unexpected errors gracefully (e.g., network issues)
         ToastMsg.showToastMsg('Something went wrong. Please try again later.');
       }
     }
@@ -46,23 +45,24 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: primaryColor,
+      backgroundColor: AppColors.blue,
       body: Stack(
         children: [
+          // Top bar with back button and title
           Positioned(
-            top: 60,
+            top: 40,
             left: 0,
             right: 0,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
                     color: Colors.white,
                     onPressed: () => Navigator.pop(context),
                   ),
+                  const Spacer(),
                   const Text(
                     'Forgot Password',
                     style: TextStyle(
@@ -71,42 +71,44 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 40), // To balance spacing
+                  const Spacer(),
+                  const SizedBox(width: 48), // Balance the back button space
                 ],
               ),
             ),
           ),
+          // White form container
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
               width: width,
-              height: height * 0.7,
-              decoration: const BoxDecoration(
+              height: height * AppConstants.formHeightRatio,
+              decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+                  topLeft: Radius.circular(AppConstants.borderRadius),
+                  topRight: Radius.circular(AppConstants.borderRadius),
                 ),
               ),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(AppConstants.formPadding),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(height: 40),
-                      // Illustration or icon
+                      // Illustration
                       Icon(
                         Icons.lock_reset,
                         size: 80,
-                        color: primaryColor,
+                        color: AppColors.blue,
                       ),
                       const SizedBox(height: 20),
                       const Text(
                         'Forgot Password?',
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: AppConstants.titleFontSize,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -119,7 +121,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                               : 'Enter your email address and we will send you a link to reset your password',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: AppConstants.subtitleFontSize,
                             color: Colors.grey[600],
                           ),
                         ),
@@ -133,7 +135,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                           decoration: InputDecoration(
                             labelText: 'Email',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(AppConstants.inputBorderRadius),
                             ),
                             prefixIcon: const Icon(Icons.email),
                           ),
@@ -152,12 +154,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         // Submit Button
                         SizedBox(
                           width: double.infinity,
-                          height: 50,
+                          height: AppConstants.buttonHeight,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryColor,
+                              backgroundColor: AppColors.blue,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(AppConstants.inputBorderRadius),
                               ),
                             ),
                             onPressed: _submitForm,
@@ -165,7 +167,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                               'Send Reset Link',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: AppConstants.buttonFontSize,
                               ),
                             ),
                           ),
@@ -181,12 +183,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         const SizedBox(height: 20),
                         SizedBox(
                           width: double.infinity,
-                          height: 50,
+                          height: AppConstants.buttonHeight,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryColor,
+                              backgroundColor: AppColors.blue,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(AppConstants.inputBorderRadius),
                               ),
                             ),
                             onPressed: () {
@@ -196,7 +198,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                               'Back to Login',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: AppConstants.buttonFontSize,
                               ),
                             ),
                           ),
@@ -212,7 +214,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                           child: Text(
                             'Remember your password? Login',
                             style: TextStyle(
-                              color: primaryColor,
+                              color: AppColors.blue,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -228,4 +230,3 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     );
   }
 }
-

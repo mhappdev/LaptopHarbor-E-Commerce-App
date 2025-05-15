@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
+import 'package:laptop_harbor/core/app_constants.dart';
 import 'package:laptop_harbor/data/local/user_local_data.dart';
 import 'package:laptop_harbor/utils/toast_msg.dart';
 
@@ -50,8 +51,6 @@ class _LoginState extends State<Login> {
 
         // Navigate
         if (role == "admin") {
-          // Navigator.push(context,
-          //     MaterialPageRoute(builder: (context) => ProductListScreen()));
           ToastMsg.showToastMsg('Login successful as admin');
           Navigator.pushReplacementNamed(context, '/admin-home');
         } else {
@@ -94,20 +93,21 @@ class _LoginState extends State<Login> {
       backgroundColor: AppColors.blue,
       body: Stack(
         children: [
+          // Top bar with back button and title
           Positioned(
-            top: 60,
+            top: 40,
             left: 0,
             right: 0,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
                     color: Colors.white,
                     onPressed: () => Navigator.pop(context),
                   ),
+                  const Spacer(),
                   const Text(
                     'Login',
                     style: TextStyle(
@@ -116,25 +116,27 @@ class _LoginState extends State<Login> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 40), // To balance spacing
+                  const Spacer(),
+                  const SizedBox(width: 48), // Balance the back button space
                 ],
               ),
             ),
           ),
+          // White form container
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
               width: width,
-              height: height * 0.75,
-              decoration: const BoxDecoration(
+              height: height * AppConstants.formHeightRatio,
+              decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+                  topLeft: Radius.circular(AppConstants.borderRadius),
+                  topRight: Radius.circular(AppConstants.borderRadius),
                 ),
               ),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(AppConstants.formPadding),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -144,7 +146,7 @@ class _LoginState extends State<Login> {
                       const Text(
                         'Welcome Back',
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: AppConstants.titleFontSize,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -152,7 +154,7 @@ class _LoginState extends State<Login> {
                       const Text(
                         'Login to your account',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: AppConstants.subtitleFontSize,
                           color: Colors.grey,
                         ),
                       ),
@@ -164,7 +166,7 @@ class _LoginState extends State<Login> {
                         decoration: InputDecoration(
                           labelText: 'Email',
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(AppConstants.inputBorderRadius),
                           ),
                           prefixIcon: const Icon(Icons.email),
                         ),
@@ -187,7 +189,7 @@ class _LoginState extends State<Login> {
                         decoration: InputDecoration(
                           labelText: 'Password',
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(AppConstants.inputBorderRadius),
                           ),
                           prefixIcon: const Icon(Icons.lock),
                         ),
@@ -221,12 +223,12 @@ class _LoginState extends State<Login> {
                       // Login Button
                       SizedBox(
                         width: double.infinity,
-                        height: 50,
+                        height: AppConstants.buttonHeight,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.blue,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(AppConstants.inputBorderRadius),
                             ),
                           ),
                           onPressed: loginUser,
@@ -239,7 +241,7 @@ class _LoginState extends State<Login> {
                                     'Login',
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 18,
+                                      fontSize: AppConstants.buttonFontSize,
                                     ),
                                   ),
                           ),
@@ -273,7 +275,7 @@ class _LoginState extends State<Login> {
                         ],
                       ),
                       const SizedBox(height: 30),
-           
+                      // Don't have an account
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

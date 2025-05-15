@@ -24,7 +24,7 @@ class Auth extends StatelessWidget {
               width: width * 0.7,
               height: width * 0.7,
               decoration: BoxDecoration(
-                color: AppColors.blue,
+                color: AppColors.blue.withOpacity(0.8),
                 shape: BoxShape.circle,
               ),
             ),
@@ -36,120 +36,113 @@ class Auth extends StatelessWidget {
               width: width * 0.8,
               height: width * 0.8,
               decoration: BoxDecoration(
-                color: AppColors.blue,
+                color: AppColors.blue.withOpacity(0.8),
                 shape: BoxShape.circle,
               ),
             ),
           ),
 
           // Main content
-          SingleChildScrollView(
-            child: SizedBox(
-              height: height,
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Logo with hero animation
                   Hero(
                     tag: 'app-logo',
                     child: SvgPicture.asset(
                       ImagesPath.appLogo,
-                      width: width * 0.35,
-                      height: width * 0.35,
+                      width: width * 0.4,
+                      height: width * 0.4,
+                      fit: BoxFit.contain,
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 32),
 
                   // Description text
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: width * 0.15),
+                    padding: EdgeInsets.symmetric(horizontal: width * 0.1),
                     child: Text(
-                      "Your premium destination for the latest laptops\nand tech accessories",
+                      "Your premium destination for the latest laptops and tech accessories",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.white,
+                        color: Colors.white.withOpacity(0.9),
                         height: 1.5,
+                        fontFamily: 'LeagueSpartan',
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 48),
 
                   // Login Button
-                  Material(
-                    borderRadius: BorderRadius.circular(30),
-                    elevation: 3,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(30),
-                      onTap: () {
+                  SizedBox(
+                    width: width * 0.75,
+                    height: 56,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: AppColors.blue,
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      onPressed: () {
                         Navigator.pushNamed(context, '/login');
                       },
-                      splashColor: Colors.white.withOpacity(0.2),
-                      highlightColor: Colors.white.withOpacity(0.1),
-                      child: Container(
-                        width: width * 0.7,
-                        height: 55,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Log In',
-                            style: TextStyle(
-                              fontFamily: 'LeagueSpartan',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
-                              color: AppColors.blue,
-                            ),
-                          ),
+                      child: Text(
+                        'Log In',
+                        style: TextStyle(
+                          fontFamily: 'LeagueSpartan',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 16),
 
                   // Sign Up Button
-                  Material(
-                    borderRadius: BorderRadius.circular(30),
-                    elevation: 3,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(30),
-                      onTap: () {
+                  SizedBox(
+                    width: width * 0.75,
+                    height: 56,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: Colors.white,
+                          width: 1.5,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () {
                         Navigator.pushNamed(context, '/signup');
                       },
-                      splashColor: Colors.black.withOpacity(0.2),
-                      highlightColor: Colors.black.withOpacity(0.1),
-                      child: Container(
-                        width: width * 0.7,
-                        height: 55,
-                        decoration: BoxDecoration(
-                          color: AppColors.black,
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(
-                            color: Colors.white,
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Sign Up',
-                            style: TextStyle(
-                              fontFamily: 'LeagueSpartan',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                          ),
+                      child: Text(
+                        'Sign Up',
+                        style: TextStyle(
+                          fontFamily: 'LeagueSpartan',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),

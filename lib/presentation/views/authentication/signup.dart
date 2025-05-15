@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:laptop_harbor/core/app_colors.dart';
+import 'package:laptop_harbor/core/app_constants.dart';
 import 'package:laptop_harbor/data/local/user_local_data.dart';
 import 'package:laptop_harbor/utils/toast_msg.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
@@ -24,7 +25,7 @@ class _SignupState extends State<Signup> {
   // Create Firebase Collection
   final users = FirebaseFirestore.instance.collection('users');
 
-// 💨 SignUp / Register Authentication Function
+  // 💨 SignUp / Register Authentication Function
   bool loader = false;
   Future<void> regUser() async {
     if (!_formKey.currentState!.validate()) return;
@@ -44,7 +45,7 @@ class _SignupState extends State<Signup> {
       // 2. Save user details to Firestore with UID as doc ID
       final uid = credential.user!.uid;
 
-// ADD USER DATA TO THE FIRESTORE DATABASE COLLECTION
+      // ADD USER DATA TO THE FIRESTORE DATABASE COLLECTION
       await users.doc(uid).set({
         "name": _nameController.text,
         "email": _emailController.text.trim(),
@@ -69,8 +70,6 @@ class _SignupState extends State<Signup> {
       await Future.delayed(Duration(seconds: 1));
 
       Navigator.pushNamed(context, '/select-profile-picture-screen');
-
-      // Navigator.pushNamed(context, '/home');
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         ToastMsg.showToastMsg('The password provided is too weak');
@@ -120,6 +119,7 @@ class _SignupState extends State<Signup> {
       backgroundColor: AppColors.blue,
       body: Stack(
         children: [
+          // Top bar with back button and title
           Positioned(
             top: 40,
             left: 0,
@@ -127,13 +127,13 @@ class _SignupState extends State<Signup> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
                     color: Colors.white,
                     onPressed: () => Navigator.pop(context),
                   ),
+                  const Spacer(),
                   const Text(
                     'Sign Up',
                     style: TextStyle(
@@ -142,25 +142,27 @@ class _SignupState extends State<Signup> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 40), // To balance spacing
+                  const Spacer(),
+                  const SizedBox(width: 48), // Balance the back button space
                 ],
               ),
             ),
           ),
+          // White form container
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
               width: width,
-              height: height * 0.85,
-              decoration: const BoxDecoration(
+              height: height * AppConstants.formHeightRatio,
+              decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+                  topLeft: Radius.circular(AppConstants.borderRadius),
+                  topRight: Radius.circular(AppConstants.borderRadius),
                 ),
               ),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(AppConstants.formPadding),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -170,8 +172,16 @@ class _SignupState extends State<Signup> {
                       const Text(
                         'Create an Account',
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: AppConstants.titleFontSize,
                           fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Fill in your details to get started',
+                        style: TextStyle(
+                          fontSize: AppConstants.subtitleFontSize,
+                          color: Colors.grey,
                         ),
                       ),
                       const SizedBox(height: 30),
@@ -181,7 +191,8 @@ class _SignupState extends State<Signup> {
                         decoration: InputDecoration(
                           labelText: 'Full Name',
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(
+                                AppConstants.inputBorderRadius),
                           ),
                           prefixIcon: const Icon(Icons.person),
                         ),
@@ -200,7 +211,8 @@ class _SignupState extends State<Signup> {
                         decoration: InputDecoration(
                           labelText: 'Email',
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(
+                                AppConstants.inputBorderRadius),
                           ),
                           prefixIcon: const Icon(Icons.email),
                         ),
@@ -216,17 +228,18 @@ class _SignupState extends State<Signup> {
                         },
                       ),
                       const SizedBox(height: 20),
-
+                      // Phone Field
                       IntlPhoneField(
                         controller: _phoneController,
                         decoration: InputDecoration(
                           labelText: 'Phone Number',
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(
+                                AppConstants.inputBorderRadius),
                           ),
                           prefixIcon: Icon(Icons.phone),
                         ),
-                        initialCountryCode: 'PK', // Default to Pakistan
+                        initialCountryCode: 'PK',
                         onChanged: (phone) {
                           fullPhoneNumber = phone.completeNumber;
                         },
@@ -237,7 +250,6 @@ class _SignupState extends State<Signup> {
                           return null;
                         },
                       ),
-
                       const SizedBox(height: 20),
                       // Password Field
                       TextFormField(
@@ -246,7 +258,8 @@ class _SignupState extends State<Signup> {
                         decoration: InputDecoration(
                           labelText: 'Password',
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(
+                                AppConstants.inputBorderRadius),
                           ),
                           prefixIcon: const Icon(Icons.lock),
                         ),
@@ -264,17 +277,16 @@ class _SignupState extends State<Signup> {
                       // Sign Up Button
                       SizedBox(
                         width: double.infinity,
-                        height: 50,
+                        height: AppConstants.buttonHeight,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.blue,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(
+                                  AppConstants.inputBorderRadius),
                             ),
                           ),
-                          // onPressed: _submitForm,
                           onPressed: regUser,
-
                           child: Center(
                             child: loader
                                 ? CircularProgressIndicator(
@@ -284,7 +296,7 @@ class _SignupState extends State<Signup> {
                                     'Sign Up',
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 18,
+                                      fontSize: AppConstants.buttonFontSize,
                                     ),
                                   ),
                           ),
