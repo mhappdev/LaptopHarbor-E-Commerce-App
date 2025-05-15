@@ -36,7 +36,7 @@ class _SelectProfilePictureScreenState
       if (pickedFile != null) {
         setState(() {
           _imageFile = File(pickedFile.path);
-          _hasError = false; // Reset error state when a new image is selected
+          _hasError = false;
         });
       }
     } catch (e) {

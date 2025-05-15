@@ -74,7 +74,7 @@ class _HomeState extends State<Home> {
     super.initState();
     _productsStream = _firestoreService.getProductsStream();
     _searchController.addListener(_onSearchChanged);
-    _fetchAllReviews(); // Add this line
+    _fetchAllReviews();
   }
 
   Future<void> _fetchAllReviews() async {
@@ -169,7 +169,7 @@ class _HomeState extends State<Home> {
     return products;
   }
 
-  // Add this method to your _HomeState class to fetch reviews for a product
+  // REVIEWS
   Map<String, dynamic> _getProductReviews(String productId) {
     if (_isLoadingReviews) return {'averageRating': 0.0, 'reviewCount': 0};
 
@@ -306,7 +306,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildLoadingState() => Center(
+Widget _buildLoadingState() => Center(
         child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(const Color(0xff037EEE)),
         ),
@@ -593,11 +593,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  // Add this method to your _HomeState class to fetch reviews for a product
-
-// Modify your _buildProductCard method to use the fetched reviews
   Widget _buildProductCard(Product product) {
-    // Get reviews data directly from the pre-fetched list
     final ratingData = _getProductReviews(product.id);
     final averageRating = ratingData['averageRating'];
     final reviewCount = ratingData['reviewCount'];

@@ -273,29 +273,7 @@ class _LoginState extends State<Login> {
                         ],
                       ),
                       const SizedBox(height: 30),
-                      // Social Login Options
-                      // Row(
-                      //   mainAxisAlignment: MainAxisAlignment.center,
-                      //   children: [
-                      //     IconButton(
-                      //       icon: Image.asset('assets/images/google.png'),
-                      //       iconSize: 50,
-                      //       onPressed: () {
-                      //         // Google login
-                      //       },
-                      //     ),
-                      //     const SizedBox(width: 20),
-                      //     IconButton(
-                      //       icon: Image.asset('assets/images/facebook.png'),
-                      //       iconSize: 50,
-                      //       onPressed: () {
-                      //         // Facebook login
-                      //       },
-                      //     ),
-                      //   ],
-                      // ),
-                      // const SizedBox(height: 30),
-                      // Don't have an account
+           
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
